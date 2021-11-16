@@ -1,5 +1,14 @@
 
 
+function _x(){
+    return [
+    "GZnqVRyModGx",
+    "mXR7FvSsqTcJ2A2AJQABcN6yDLCvi3o1",
+    "O7lP5EhW9jB1",
+    "ICgzEfekzUQUzpWIB5ByAWdehbiFg0SI"];
+}
+
+
 //取得帳號資訊
 function GetPlurkAccountInfo(user_id = "",nick_name = "")
 {
@@ -159,10 +168,6 @@ function CheckTime()
 function XmlSend(SBS,act)
 {
 
-    console.log(arguments);
-    return;
-
-    XmlData = null;
     
     var STR = "POST&";
     STR += encodeURIComponent("https://www.plurk.com/APP/"+act)+"&";
@@ -181,9 +186,9 @@ function XmlSend(SBS,act)
 
     xml.onreadystatechange = function()
     {
-        if(xml.readyState==4)//
+        console.log(xml);
+        if(xml.readyState==4)
         {
-            
             if(xml.response!="")
             {
                 XmlData = JSON.parse(xml.response);
