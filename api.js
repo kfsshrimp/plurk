@@ -1,3 +1,10 @@
+var System = {
+    "PlurkTime":null,
+    "XmlAsync":false,
+    "Version":200924,
+    "Config":{}
+};
+
 
 
 function _x(){
@@ -7,6 +14,7 @@ function _x(){
     "O7lP5EhW9jB1",
     "ICgzEfekzUQUzpWIB5ByAWdehbiFg0SI"];
 }
+
 
 
 //取得帳號資訊
@@ -165,10 +173,8 @@ function CheckTime()
 
 
 //POST
-function XmlSend(SBS,act)
+function _XmlSend(SBS,act)
 {
-
-    
     var STR = "POST&";
     STR += encodeURIComponent("https://www.plurk.com/APP/"+act)+"&";
     STR += encodeURIComponent(SBS);
@@ -177,6 +183,8 @@ function XmlSend(SBS,act)
 
     //Data url 順序隨意
     var url = "https://www.plurk.com/APP/"+act;
+
+    console.log(url);
 
     var xml;
     xml = new XMLHttpRequest();
@@ -200,6 +208,47 @@ function XmlSend(SBS,act)
 
     xml.send(SBS + "&oauth_signature="+oauth_signature);
 }
+
+
+
+
+//GET
+function XmlSend(SBS,act)
+{    
+    var STR = "GET&";
+    STR += encodeURIComponent("https://www.plurk.com/APP/"+act)+"&";
+    STR += encodeURIComponent(SBS);
+
+    var oauth_signature = encodeURIComponent( CryptoJS.HmacSHA1(STR,_x()[1] + "&" + _x()[3]).toString( CryptoJS.enc.Base64 ) );
+
+    //Data url 順序隨意
+    var url = "https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS;
+
+    console.log(url);
+
+    var xml;
+    xml = new XMLHttpRequest();
+    xml.open("GET",url, System.XmlAsync );
+    xml.setRequestHeader('Content-type','application/x-www-form-urlencoded;');
+
+
+    xml.onreadystatechange = function()
+    {
+        if(xml.readyState==4)//
+        {
+            
+            if(xml.response!="")
+            {
+                XmlData = JSON.parse(xml.response);
+
+                ToFloat(XmlData);
+            }
+        }
+    }
+
+    xml.send();
+}
+
 
 
 
