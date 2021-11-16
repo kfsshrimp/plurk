@@ -228,7 +228,7 @@ function XmlSend(SBS,act)
     console.log(url);
 
     
-    open(url);
+    document.querySelector("iframe").setAttribute("src",url);
     return;
 
     var xml;
