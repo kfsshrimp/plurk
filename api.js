@@ -173,7 +173,7 @@ function CheckTime()
 
 
 //POST
-function XmlSend(SBS,act)
+function _XmlSend(SBS,act)
 {
     var STR = "POST&";
     STR += encodeURIComponent("https://www.plurk.com/APP/"+act)+"&";
@@ -186,8 +186,6 @@ function XmlSend(SBS,act)
 
     console.log(url);
 
-    open(url);
-    return;
 
     var xml;
     xml = new XMLHttpRequest();
@@ -216,7 +214,7 @@ function XmlSend(SBS,act)
 
 
 //GET
-function _XmlSend(SBS,act)
+function XmlSend(SBS,act)
 {    
     var STR = "GET&";
     STR += encodeURIComponent("https://www.plurk.com/APP/"+act)+"&";
@@ -228,6 +226,10 @@ function _XmlSend(SBS,act)
     var url = "https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS;
 
     console.log(url);
+
+    
+    open(url);
+    return;
 
     var xml;
     xml = new XMLHttpRequest();
