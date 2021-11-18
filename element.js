@@ -1,32 +1,33 @@
 
 window.onload = function(){
 
-    for(var k in System.PlurkApiAct)
-    {
-        var opt = document.createElement("option");
-        opt.value = k;
-        opt.text = System.PlurkApiAct[k];
-        document.querySelector("#act").appendChild(opt);
-    }
 
+    GetRePlurkId( PlurkId(System.Config.plurk_id),"","",function(res,txt,url){
 
+        var replurk = JSON.parse(res);
 
-    document.querySelector("#submit").addEventListener("click",ApiSend)
+        for(var i in replurk.responses)
+        {
+            var html = replurk.responses[i].content;
+            var div = document.createElement("div");
+            div.innerHTML = html;
+
+            document.body.appendChild(div);
+        }
+        
+
+        for(var i in document.querySelectorAll("img"))
+        {
+            document.querySelectorAll("img")[i].removeAttribute("height");
+        }
+    });
+
+    
 }
 
 
 function ApiSend(){
 
-    var act = document.querySelector("#act").value;
-    var keyword = document.querySelector("#keyword").value;
-
-    if( typeof(eval(`${act}`))==="function" )
-    {
-        eval(`${act}("","${keyword}")`);
-    }
-    else
-    {
-        console.log("not function")
-    }
+   
 
 }

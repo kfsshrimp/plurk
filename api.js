@@ -4,7 +4,9 @@ var System = {
     "PlurkApiAct":{
         "GetPlurkAccountInfo":"取得帳號資訊"
     },
-    "Config":{}
+    "Config":{
+        "plurk_id":"of50t3"
+    }
 };
 
 
@@ -34,7 +36,8 @@ function GetPlurkAccountInfo(user_id = "",nick_name = "")
     var SBS = "include_plurks=false&"+ nick_name + "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0"+user_id;//15827606
 
     XmlSend(SBS,"Profile/getPublicProfile",(xml)=>{
-        console.log( JSON.parse(xml.response) );
+        console.log(xml)
+        //console.log( JSON.parse(xml.response) );
     });
 }
 
@@ -102,7 +105,7 @@ function GetPlurkId(plurk_id)
 
 
 //ID搜尋回噗
-function GetRePlurkId(plurk_id,count = "",from_response = "")
+function GetRePlurkId(plurk_id,count = "",from_response = "",func)
 {
     if(count!="") count = "count="+count+"&";
     if(from_response!="") from_response = "from_response="+from_response+"&";
@@ -110,7 +113,7 @@ function GetRePlurkId(plurk_id,count = "",from_response = "")
     var SBS = count + from_response + "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0&plurk_id="+plurk_id;
 
     XmlSend(SBS,"Responses/get",(xml)=>{
-        console.log(xml)
+        func(xml.response,xml.responseText,xml.responseURL)
     });
 }
 
@@ -255,7 +258,7 @@ function shuffleJSON(json) {
 
 
 
-function PlurkId(input)
+function PlurkId(input,)
 {
     return (isNaN(parseInt(input))) ? parseInt(input,36) : parseInt(input);
 }
