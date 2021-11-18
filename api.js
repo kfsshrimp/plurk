@@ -1,9 +1,12 @@
 var System = {
-    "PlurkTime":null,
+    "CORS":"https://cors-anywhere.herokuapp.com/",
     "XmlAsync":false,
-    "Version":200924,
+    "PlurkApiAct":{
+        "GetPlurkAccountInfo":"取得帳號資訊"
+    },
     "Config":{}
 };
+
 
 
 
@@ -16,6 +19,11 @@ function _x(){
 }
 
 
+//PlurkSearch/search 噗文內容 搜尋關鍵字
+
+
+
+
 
 //取得帳號資訊
 function GetPlurkAccountInfo(user_id = "",nick_name = "")
@@ -25,7 +33,9 @@ function GetPlurkAccountInfo(user_id = "",nick_name = "")
 
     var SBS = "include_plurks=false&"+ nick_name + "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0"+user_id;//15827606
 
-    XmlSend(SBS,"Profile/getPublicProfile");
+    XmlSend(SBS,"Profile/getPublicProfile",(xml)=>{
+        console.log( JSON.parse(xml.response) );
+    });
 }
 
 
@@ -99,7 +109,9 @@ function GetRePlurkId(plurk_id,count = "",from_response = "")
 
     var SBS = count + from_response + "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0&plurk_id="+plurk_id;
 
-    XmlSend(SBS,"Responses/get");
+    XmlSend(SBS,"Responses/get",(xml)=>{
+        console.log(xml)
+    });
 }
 
 
@@ -172,49 +184,12 @@ function CheckTime()
 }
 
 
-//POST
-function _XmlSend(SBS,act)
-{
-    var STR = "POST&";
-    STR += encodeURIComponent("https://www.plurk.com/APP/"+act)+"&";
-    STR += encodeURIComponent(SBS);
-
-    var oauth_signature = encodeURIComponent( CryptoJS.HmacSHA1(STR,_x()[1] + "&" + _x()[3]).toString( CryptoJS.enc.Base64 ) );
-
-    //Data url 順序隨意
-    var url = "https://www.plurk.com/APP/"+act;
-
-    console.log(url);
-
-
-    var xml;
-    xml = new XMLHttpRequest();
-    xml.open("POST",url, System.XmlAsync);
-    xml.setRequestHeader('Content-type','application/x-www-form-urlencoded;');
-
-
-    xml.onreadystatechange = function()
-    {
-        console.log(xml);
-        if(xml.readyState==4)
-        {
-            if(xml.response!="")
-            {
-                XmlData = JSON.parse(xml.response);
-
-                ToFloat(XmlData);
-            }
-        }
-    }
-
-    xml.send(SBS + "&oauth_signature="+oauth_signature);
-}
 
 
 
 
 //GET
-function XmlSend(SBS,act)
+function XmlSend(SBS,act,func)
 {    
     var STR = "GET&";
     STR += encodeURIComponent("https://www.plurk.com/APP/"+act)+"&";
@@ -223,34 +198,15 @@ function XmlSend(SBS,act)
     var oauth_signature = encodeURIComponent( CryptoJS.HmacSHA1(STR,_x()[1] + "&" + _x()[3]).toString( CryptoJS.enc.Base64 ) );
 
     //Data url 順序隨意
-    var url = "https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS;
-
-    console.log(url);
-
-    var new_plurk = window.open(url);
-    console.log(new_plurk);
-    document.querySelector("iframe").setAttribute("src",url);
-    return;
+    var url = System.CORS + "https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS;
 
     var xml;
     xml = new XMLHttpRequest();
     xml.open("GET",url, System.XmlAsync );
     xml.setRequestHeader('Content-type','application/x-www-form-urlencoded;');
 
-
-    xml.onreadystatechange = function()
-    {
-        if(xml.readyState==4)//
-        {
-            
-            if(xml.response!="")
-            {
-                XmlData = JSON.parse(xml.response);
-
-                ToFloat(XmlData);
-            }
-        }
-    }
+    if( typeof(func)==="function" )
+        xml.onreadystatechange = ()=>{ func(xml); }
 
     xml.send();
 }
