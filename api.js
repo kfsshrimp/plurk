@@ -1,11 +1,7 @@
 var System = {
     "CORS":"https://cors-anywhere.herokuapp.com/",
-    "XmlAsync":false,
-    "Config":{}
+    "XmlAsync":false
 };
-
-
-
 
 function _x(){
     return [

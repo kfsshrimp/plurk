@@ -1,0 +1,10 @@
+body{
+    background: #555;
+}
+div{
+    margin: 4px;
+    padding-left: 10px;
+}
+input[type=button]{
+    cursor: pointer;
+}
