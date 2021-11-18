@@ -1,5 +1,6 @@
 var System = {
-    "CORS":"https://cors-anywhere.herokuapp.com/",
+    //"CORS":"https://cors-anywhere.herokuapp.com/",
+    "CORS":"https://api.allorigins.win/get?url=",
     "XmlAsync":false
 };
 
@@ -301,7 +302,10 @@ function XmlSend(SBS,act,func)
     var oauth_signature = encodeURIComponent( CryptoJS.HmacSHA1(STR,_x()[1] + "&" + _x()[3]).toString( CryptoJS.enc.Base64 ) );
 
     //Data url 順序隨意
-    var url = System.CORS + "https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS;
+    //var url = System.CORS + ("https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS);
+
+    //for api.allorigins.win
+    var url = System.CORS + encodeURIComponent("https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS);
 
     var xml;
     xml = new XMLHttpRequest();

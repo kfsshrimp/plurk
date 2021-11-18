@@ -20,21 +20,27 @@ window.onload = function(){
     ALL.api.arg.plurk_id = PlurkId("omkzh9");
     ALL.api.act = "Timeline/getPlurk";
     ALL.api.func = function(xml){
+        console.log(xml);
 
-        var data = JSON.parse(xml.response);
+        var data = JSON.parse((xml.response));
+        data = JSON.parse(data.contents);
         ALL.data.title_plurk = data.plurk;
+
+        console.log(data);
 
         ALL.api.act = "Responses/get";
         ALL.api.func = function(xml){
 
-            var data = JSON.parse(xml.response);
+            var data = JSON.parse((xml.response));
+            data = JSON.parse(data.contents);
+            
             for(var i in data.responses)
             {
                 if(ALL.data.title_plurk.owner_id===data.responses[i].user_id)
                 ALL.list[ data.responses[i].id ] = data.responses[i];
             }
         }
-        setTimeout( ()=>{ALL.api.Send();},10);
+        setTimeout( ()=>{ALL.api.Send();},100);
     }
     ALL.api.Send();
 
