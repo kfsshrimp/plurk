@@ -2,7 +2,7 @@
 window.onload = function(){
 
 
-    GetRePlurkId( PlurkId(System.Config.plurk_id),"","",function(res,txt,url){
+    GetRePlurkId( PlurkId("of50t3"),"","",function(res,txt,url){
 
         var replurk = JSON.parse(res);
 

@@ -1,12 +1,7 @@
 var System = {
     "CORS":"https://cors-anywhere.herokuapp.com/",
     "XmlAsync":false,
-    "PlurkApiAct":{
-        "GetPlurkAccountInfo":"取得帳號資訊"
-    },
-    "Config":{
-        "plurk_id":"of50t3"
-    }
+    "Config":{}
 };
 
 
@@ -22,6 +17,116 @@ function _x(){
 
 
 //PlurkSearch/search 噗文內容 搜尋關鍵字
+
+
+function PlurkApi( opt = {})
+{
+    this.func = opt.func||function(){};
+    this.arg = opt.arg||{};
+
+    for(var key in opt) this[key] = opt[key]||"";
+    
+
+    var api_row = [
+        "content&","limited_to","no_comments&","&plurk_id","count&","from_response&","&response_id"
+    ];
+
+    this.Send = ()=>{
+
+        for(var key of api_row)
+        {
+            var word = key.split("&").filter(a=>a!=="")[0]||"";
+
+            this.arg[word] = this.arg[word]||"";
+
+            
+            this.arg[word] = (this.arg[word]).toString();
+
+            this.arg[word] = 
+            (!this.arg[word])?"":word+"="+encodeURIComponent(this.arg[word]);
+
+            if(key.indexOf("limited_to")!==-1)
+                this.arg[word] = 
+                (!this.arg[word])?"":word+"="+encodeURIComponent("["+this.arg[word]+"]");
+
+
+            if(key.substr(0,1)==="&" && !!this.arg[word]) this.arg[word] = "&"+this.arg[word];
+            if(key.substr(-1,1)==="&" && !!this.arg[word]) this.arg[word] = this.arg[word]+"&";
+        }
+
+        switch (this.act)
+        {
+            case "Timeline/getPlurk":
+
+                this.SBS = 
+                "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0"+this.arg.plurk_id;
+            break;
+
+            case "Responses/get":
+
+                this.SBS = 
+                this.arg.count + 
+                this.arg.from_response + 
+                "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0"+this.arg.plurk_id;
+            break;
+
+            case "Timeline/plurkAdd":
+
+                this.SBS = 
+                this.arg.content+
+                this.arg.limited_to+
+                this.arg.no_comments+"oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0&qualifier="+encodeURIComponent(":");
+            break;
+
+            case "Timeline/plurkDelete":
+                this.SBS = 
+                "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0"+this.arg.plurk_id;
+            break;
+
+            case "Timeline/plurkEdit":
+
+                this.SBS = 
+                this.arg.content + 
+                this.arg.no_comments+
+                "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0"+this.arg.plurk_id;
+            break;
+
+
+            case "Responses/responseAdd":
+                this.SBS = 
+                this.arg.content + "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0"+this.arg.plurk_id+"&qualifier="+encodeURIComponent(":");
+            break;
+
+            case "Responses/responseDelete":
+                this.SBS = 
+                "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0"+this.arg.plurk_id+this.arg.response_id;
+            break;
+
+
+            case "checkTime":
+                this.SBS = 
+                "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0";
+            break;
+
+
+            default:
+            break;
+        }
+        XmlSend( this.SBS, this.act , this.func );
+
+        for(var key in this.arg )
+        {
+            this.arg[key] = this.arg[key]||"";
+            
+            this.arg[key] = this.arg[key].split("&").filter(a=>a!=="")[0]||"";
+
+            this.arg[key] = decodeURIComponent( this.arg[key].split("=")[1]||"" );
+        }
+
+    }
+}
+
+
 
 
 
@@ -90,7 +195,6 @@ function DelRePlurk(plurk_id,re_plurk_id)
     var SBS = "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0&plurk_id="+plurk_id+"&response_id="+re_plurk_id;
 
     XmlSend(SBS,"Responses/responseDelete");
-
 }
 
 
@@ -236,25 +340,6 @@ function shuffle(array) {
     }
 }
 
-function shuffleJSON(json) {
-    var ary = [];
-    
-    for(key in json)
-    {
-        var tmp = {};
-        tmp[key] = json[key];
-        ary.push(  tmp );
-    }
-    shuffle(ary);
-
-    var new_json = {};
-    for(key in ary)
-    {
-        for(key2 in ary[key])
-            new_json[key2] = ary[key][key2];
-    }
-    return new_json;
-}
 
 
 
@@ -265,105 +350,11 @@ function PlurkId(input,)
 
 
 
-
-function JsonArray(data,idex = "__idx" )
-{
-    var _return;
-
-    if( Array.isArray(data)===false )
-    {
-        _return = [];
-        for(key in data)
-        {
-            data[key][idex] = key;
-            _return.push(data[key]);
-        }
-    }
-    else
-    {
-        _return = {};
-        for(key in data)
-        {
-            var _idex = key;
-
-            if(data[key][idex]!==undefined)
-            {
-                _idex = data[key][idex];
-                delete data[key][idex];
-            }
-
-            delete data[key][idex];
-
-            _return[ _idex ] = data[key];
-        }
-    }
-
-    return _return;
-}
-
-function JsonSort(data,row,type = 0)
-{
-    var _data = JSON.parse(JSON.stringify(data));
-    data = _data;
-
-    for(key in data)
-        data[key]["__sort"] = data[key][row];
-
-
-    if(type==0)
-    {
-        data.sort( function(a,b){
-            return b["__sort"] - a["__sort"];
-        });
-    }
-    else
-    {
-        data.sort( function(a,b){
-            return a["__sort"] - b["__sort"];
-        });
-    }
-
-    for(key in data) 
-        delete data[key]["__sort"];
-
-    return data;
-}
-
-
-
-
-function ToFloat(obj)
-{
-    for(key in obj)
-    {
-        if( typeof(obj[key])=="object" )
-        {
-            ToFloat(obj[key]);
-        }
-        else
-        {
-            if( isNaN(Number(obj[key]))===false) 
-            {
-                obj[key] = Number(obj[key]);
-            }
-        }
-    }
-
-    return obj;
-}
-
-
-function Random(i){
-    return Math.floor(Math.random()*i)+1;
-}
-
-
 function DateF(date)
 {
     var _d = new Date(date);
     var _w = "";
 
-    
     
     _w = _d.getFullYear() + "/" + parseInt(_d.getMonth()+1) + "/" + _d.getDate() + " " + _d.getHours() + ":" + _d.getMinutes() + ":" + _d.getSeconds();
 
