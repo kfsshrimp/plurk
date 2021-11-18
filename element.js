@@ -2,7 +2,8 @@ var ALL = {
     "MENU":{
         "HOLO":{
             "兎田ぺこら":["兔","佩克拉"],
-            "大神ミオ":["Mio","狼媽"]
+            "大神ミオ":["Mio","狼媽"],
+            "Ninomae Ina'nis":["ina"]
         },
         "ASMR":{
     
@@ -16,8 +17,22 @@ var ALL = {
 window.onload = function(){
 
     ALL.api = ALL.api||new PlurkApi();
+
+    ApiGetList( [PlurkId("omkzh9"),PlurkId("om005g")] );
+
     
-    ALL.api.arg.plurk_id = PlurkId("omkzh9");
+
+
+    MenuCr(ALL.MENU,document.body);
+}
+
+var x = 0;
+function ApiGetList(plurk_id)
+{
+    console.log(x++);
+    if(x>99) return;
+
+    ALL.api.arg.plurk_id = plurk_id.pop();
     ALL.api.act = "Timeline/getPlurk";
     ALL.api.func = function(xml){
         console.log(xml);
@@ -45,37 +60,8 @@ window.onload = function(){
     ALL.api.Send();
 
 
-    MenuCr(ALL.MENU,document.body);
-}
-
-
-function ApiGetList(plurk_id)
-{
-    ALL.api = ALL.api||new PlurkApi();
-
-    ALL.api.arg.plurk_id = plurk_id[0];
-    ALL.api.act = "Timeline/getPlurk";
-    ALL.api.func = function(res,txt,url){
-
-        
-
-        var data = JSON.parse(res.response);
-        ALL.data.title_plurk = data.plurk;
-
-        ALL.api.act = "Responses/get";
-        ALL.api.func = function(res,txt,url){
-
-            var data = JSON.parse(res.response);
-            for(var i in data.responses)
-            {
-                if(ALL.data.title_plurk.owner_id===data.responses[i].user_id)
-                ALL.list[ data.responses[i].id ] = data.responses[i];
-            }
-        }
-        setTimeout( ()=>{ALL.api.Send();},500);
-    }
-    ALL.api.Send();
-    
+    if(plurk_id.length>0)
+        setTimeout( ()=>{ApiGetList(plurk_id)},500 );
 }
 
 
@@ -90,7 +76,7 @@ function MenuCr(menu,ele)
         btn.value = key;
 
 
-        if( ele.querySelector(`[value=${key}]`) ) continue;
+        if( ele.querySelector(`[value="${key}"]`) ) continue;
 
 
         div.appendChild(btn);
@@ -133,7 +119,7 @@ function Search(keyword)
 
         for(var key of keyword)
         {
-            if(data.content.indexOf(key)!==-1)
+            if(data.content.toLocaleLowerCase().indexOf(key.toLocaleLowerCase())!==-1)
             {
                 if(search_id.indexOf(data.id)===-1) search_id.push(data.id);
             }
