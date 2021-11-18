@@ -19,7 +19,39 @@ window.onload = function(){
     
     ALL.api.arg.plurk_id = PlurkId("omkzh9");
     ALL.api.act = "Timeline/getPlurk";
+    ALL.api.func = function(xml){
+
+        var data = JSON.parse(xml.response);
+        ALL.data.title_plurk = data.plurk;
+
+        ALL.api.act = "Responses/get";
+        ALL.api.func = function(xml){
+
+            var data = JSON.parse(xml.response);
+            for(var i in data.responses)
+            {
+                if(ALL.data.title_plurk.owner_id===data.responses[i].user_id)
+                ALL.list[ data.responses[i].id ] = data.responses[i];
+            }
+        }
+        setTimeout( ()=>{ALL.api.Send();},10);
+    }
+    ALL.api.Send();
+
+
+    MenuCr(ALL.MENU,document.body);
+}
+
+
+function ApiGetList(plurk_id)
+{
+    ALL.api = ALL.api||new PlurkApi();
+
+    ALL.api.arg.plurk_id = plurk_id[0];
+    ALL.api.act = "Timeline/getPlurk";
     ALL.api.func = function(res,txt,url){
+
+        
 
         var data = JSON.parse(res.response);
         ALL.data.title_plurk = data.plurk;
@@ -37,38 +69,6 @@ window.onload = function(){
         setTimeout( ()=>{ALL.api.Send();},500);
     }
     ALL.api.Send();
-
-
-    MenuCr(ALL.MENU,document.body);
-}
-
-
-function ApiGetList(plurk_id)
-{
-    ALL.api = ALL.api||new PlurkApi();
-
-
-    
-        ALL.api.arg.plurk_id = plurk_id[0];
-        ALL.api.act = "Timeline/getPlurk";
-        ALL.api.func = function(res,txt,url){
-
-            var data = JSON.parse(res.response);
-            ALL.data.title_plurk = data.plurk;
-
-            ALL.api.act = "Responses/get";
-            ALL.api.func = function(res,txt,url){
-
-                var data = JSON.parse(res.response);
-                for(var i in data.responses)
-                {
-                    if(ALL.data.title_plurk.owner_id===data.responses[i].user_id)
-                    ALL.list[ data.responses[i].id ] = data.responses[i];
-                }
-            }
-            setTimeout( ()=>{ALL.api.Send();},500);
-        }
-        ALL.api.Send();
     
 }
 
@@ -76,14 +76,6 @@ function ApiGetList(plurk_id)
 
 function MenuCr(menu,ele)
 {
-    ALL.main = document.querySelector("#list");
-    if(ALL.main===null)
-    {
-        ALL.main = document.createElement("div");
-        ALL.main.id = "list";
-        document.body.appendChild(ALL.main);
-    }
-
     for(let key in menu)
     {
         let div = document.createElement("div");
@@ -91,7 +83,6 @@ function MenuCr(menu,ele)
         btn.type = "button";
         btn.value = key;
 
-        console.log(`[value=${key}]`);
 
         if( ele.querySelector(`[value=${key}]`) ) continue;
 
@@ -114,6 +105,14 @@ function MenuCr(menu,ele)
             }
 
         });
+    }
+
+    ALL.main = document.querySelector("#list");
+    if(ALL.main===null)
+    {
+        ALL.main = document.createElement("div");
+        ALL.main.id = "list";
+        document.body.appendChild(ALL.main);
     }
 }
 
