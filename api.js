@@ -7,14 +7,12 @@ var System = {
 
 function _x(){
     return [
-    "GZnqVRyModGx",
-    "mXR7FvSsqTcJ2A2AJQABcN6yDLCvi3o1",
-    "O7lP5EhW9jB1",
-    "ICgzEfekzUQUzpWIB5ByAWdehbiFg0SI"];
+    "PjKhvBiudHOl",
+    "xdNl7fNTBMISKOCPzY1RM49mJXK8fwOG",
+    "TDVM8Q8iwq6O",
+    "K7TtXccPALzfCVrtohLffJOjCc63XauX"];
 }
 
-
-//PlurkSearch/search 噗文內容 搜尋關鍵字
 
 
 function PlurkApi( opt = {})
@@ -40,17 +38,25 @@ function PlurkApi( opt = {})
             
             this.arg[word] = (this.arg[word]).toString();
 
-            this.arg[word] = 
-            (!this.arg[word])?"":word+"="+encodeURIComponent(this.arg[word]);
+           
 
             if(key.indexOf("limited_to")!==-1)
+            {
                 this.arg[word] = 
                 (!this.arg[word])?"":word+"="+encodeURIComponent("["+this.arg[word]+"]");
+            }
+            else
+            {
+                this.arg[word] = 
+                (!this.arg[word])?"":word+"="+encodeURIComponent(this.arg[word]);
+            }
 
 
             if(key.substr(0,1)==="&" && !!this.arg[word]) this.arg[word] = "&"+this.arg[word];
             if(key.substr(-1,1)==="&" && !!this.arg[word]) this.arg[word] = this.arg[word]+"&";
         }
+        console.log(this.arg);
+        
 
         switch (this.act)
         {
