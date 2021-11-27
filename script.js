@@ -58,11 +58,45 @@ var ALL = {
     "api":null,
     "plurk":{},
     "obj":{},
-    "loading":false
+    "loading":false,
+    "config":{
+        "api":new PlurkApi({
+            act:"Timeline/getPlurk",
+            arg:{
+                plurk_id:PlurkId("onburz"),
+            },
+            func:function(xml){
+                var plurk = JSON.parse((xml.response));
+                ALL.config.plurk[ plurk.plurk.plurk_id ] = plurk;
+
+                ALL.config.api.act = "Responses/get";
+                ALL.config.api.func = function(xml){
+                    
+                    var replurk = JSON.parse((xml.response));
+                    for(var r_id in replurk.responses)
+                    {
+                        let f_data = replurk.responses[r_id];
+                        if(f_data.user_id!==plurk.plurk.user_id) continue;
+
+                        ALL.config.plurk[ f_data.plurk_id ].responses = 
+                        ALL.config.plurk[ f_data.plurk_id ].responses||{};
+
+                        ALL.config.plurk[ f_data.plurk_id ].responses[ f_data.id ] = f_data;
+                    }
+                }
+                setTimeout(()=>{ ALL.config.api.Send(); },100);
+            }
+        }),
+        "plurk":{}
+    }
 
 }
 window.onload = function(){
     
+
+    ALL.config.api.Send();
+
+
 
     ALL.obj.block = document.querySelector("#block");
     if(ALL.obj.block===null)
@@ -96,6 +130,11 @@ window.onload = function(){
             Search( e.target.dataset.search );
         }
 
+        if(e.target.dataset.keyword_search)
+        {
+            Search( ALL.obj.menu.querySelector("#keyword_search input[type=text]").value );
+        }
+
         if(e.target.dataset.menu)
         {
             var path = e.target.dataset.menu;
@@ -113,8 +152,10 @@ window.onload = function(){
         {
             var iframe_div = e.target.parentElement.querySelector("[iframe]");
             iframe_div.querySelector("iframe").src = e.target.dataset.iframe;
+
+            //iframe_div.querySelector("iframe").onload = ()=> {  };
             setTimeout(()=>{
-                iframe_div.removeAttribute("hide");
+                iframe_div.removeAttribute("hide")
             },1000);
         }
 
@@ -142,6 +183,7 @@ window.onload = function(){
 
         if(e.target.getAttribute("close")!==null)
         {
+            e.target.parentElement.querySelector("iframe").setAttribute("src","");
             e.target.parentElement.setAttribute("hide","");
         }
     })
@@ -162,11 +204,43 @@ window.onload = function(){
     });
 
 
+    window.addEventListener("scroll",(e)=>{
+
+        var list = document.querySelectorAll("#main>div>div[hide]");
+
+
+        if(window.innerHeight+window.scrollY>=document.body.scrollHeight)
+        {
+            var show_count = Math.floor(document.querySelector("#main").offsetWidth / (document.querySelector("#main>div>div").offsetWidth));
+            for(var i=0;i<show_count;i++)
+            {
+                if(list[i])
+                list[i].removeAttribute("hide");
+            }
+        }
+
+
+    });
+
+
     ALL.api = ALL.api||new PlurkApi();
 
 
-    LoadingBlock();
-    ApiGetList( [PlurkId("omkzh9")] );
+    //ApiGetList( [PlurkId("omkzh9")] );
+
+    var plurk_id_list = [
+        "of50t3",
+        "no5x7f",
+        "noplba",
+        "npiqwi",
+        "nqdwra",
+        "o1vtlu",
+        "o5oq3y",
+        "omkzh9"
+    ].map(a=>{return PlurkId(a);});
+
+    ApiGetList( plurk_id_list );
+    
     
 
     MenuCr("MENU",ALL.obj.menu);
@@ -177,8 +251,6 @@ function ApiGetList(plurk_id)
 {
     if(x>99) return;
 
-    ALL.loading = true;
-    
     var plurk = {};
 
     ALL.api.arg.plurk_id = plurk_id.pop();
@@ -190,8 +262,7 @@ function ApiGetList(plurk_id)
         if(ALL.plurk[ plurk.plurk.plurk_id ]!==undefined)
         {
             console.log("LOOP STOP");
-            LoadingBlock();
-            return;
+            return; 
         }
         
         ALL.plurk[ plurk.plurk.plurk_id ] = plurk;
@@ -201,13 +272,16 @@ function ApiGetList(plurk_id)
                 "plurk_id":plurk.plurk.plurk_id
             },
             func:function(xml){
-                var replurk = JSON.parse((xml.response))
+
+                ALL.loading = false;
+                var replurk = JSON.parse((xml.response));
                 
                 for(var r_id in replurk.responses)
                 {
                     let f_data = replurk.responses[r_id];
                     if(f_data.user_id!==plurk.plurk.user_id) continue;
 
+                    /*
                     if(f_data.content_raw.indexOf("https://www.plurk.com/")!==-1)
                     {
                         ALL.loading = true;
@@ -218,28 +292,31 @@ function ApiGetList(plurk_id)
                             ApiGetList( [PlurkId(tmp)] );
                         },1000);
                     }
+                    */
 
+                    ALL.plurk[ plurk.plurk.plurk_id ].responses = 
+                    ALL.plurk[ plurk.plurk.plurk_id ].responses||{};
+                    
                     ALL.plurk[ f_data.plurk_id ].responses[ f_data.id ] = f_data;
                 }
+
             }
         });
 
-        ALL.plurk[ plurk.plurk.plurk_id ].responses = 
-        ALL.plurk[ plurk.plurk.plurk_id ].responses||{};
+        
 
-        console.log(plurk);
 
         setTimeout( ()=>{ ALL.plurk[ plurk.plurk.plurk_id ].api.Send(); },1000);
-
+        
     }
     ALL.api.Send();
 
 
-    if(ALL.loading===false)
-        LoadingBlock();
+    if(plurk_id.length>0)
+    {
+        setTimeout( ()=>{ApiGetList(plurk_id)},1000 );
+    }
 
-    //if(plurk_id.length>0)
-        //setTimeout( ()=>{ApiGetList(plurk_id)},1000 );
 }
 
 
@@ -272,11 +349,28 @@ function MenuCr(path,obj)
         if( obj.querySelector(`[value="${key}"]`) ) continue;
 
         div.appendChild(btn);
-        obj.appendChild(div);
-
-
-        
+        obj.appendChild(div);        
     }
+
+    if(ALL.obj.menu.querySelector("#keyword_search")===null)
+    {
+        var div = document.createElement("div");
+        div.id = "keyword_search";
+
+        var txt = document.createElement("input");
+        txt.type = "text";
+        var bnt = document.createElement("input");
+        bnt.type = "button";
+        bnt.value = "搜尋";
+        bnt.dataset.keyword_search = "true";
+
+        div.appendChild(txt);
+        div.appendChild(bnt);
+
+        obj.appendChild(div);
+    }
+
+
 }
 
 
@@ -302,6 +396,8 @@ function Search(keyword)
             }
         }
     }
+
+    console.log(search_result);
 
     ALL.obj.main.innerHTML = "";
     
@@ -341,16 +437,26 @@ function Search(keyword)
 
     ALL.obj.main.appendChild(div);
 
+
+
+
     for(var idx=0;idx<div.querySelectorAll("div").length;idx++)
     {
         var list = div.querySelectorAll("div")[idx];
 
-        var a = list.querySelector("a")||{"href":""};
-        
-        
-        if(a.href.indexOf("youtu")!==-1)
+        var a = list.querySelectorAll("a");
+
+        var content_type = "";
+        for(var i=0;i<a.length;i++)
         {
-            list.className = "yt";
+            if( a[i].href.indexOf("youtu")!==-1 ) content_type = "yt";
+            if( a[i].href.indexOf("nhentai")!==-1 ) content_type = "nh";
+        }
+        list.className = content_type;
+
+        
+        if(content_type==="yt")
+        {
             var title = list.querySelector("a").text;
             var img = list.querySelector("img").src;
             var date = list.querySelector("date").innerHTML;
@@ -361,7 +467,7 @@ function Search(keyword)
             img = img.join("/");
 
             list.innerHTML = `
-            <a target="_blank" href="${a.href}">
+            <a target="_blank" href="${a[0].href}">
             <yt_title>${title}</yt_title>
             </a>
             <img data-iframe="https://www.youtube.com/embed/${yt_id}" src="${img}">
@@ -370,7 +476,39 @@ function Search(keyword)
             <iframe src=""></iframe></div>
             <date>${date}</date>`;
         }
+        else if(content_type==="nh")
+        {
+            var url = list.querySelectorAll("a:not([class*=pictureservices])");
+            var title = list.text;
+            var img = list.querySelectorAll("a[class*=pictureservices]");
+            var date = list.querySelector("date").innerHTML;
+            var plurk_id = (search_result[list.id].plurk_id).toString(36);
+
+            for(var i=0;i<img.length;i++)
+            {
+                var tmp = img[i].querySelector("img").src;
+                tmp = tmp.split("/");
+                tmp["3"] = tmp["3"].split("_");
+                tmp["3"].shift();
+                tmp["3"] = tmp["3"].toString().replace("jpg","png")
+                img[i].querySelector("img").src = tmp.join("/");
+            }
+
+            list.innerHTML = `
+            <a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>
+            <a target="_blank" href="${url[0].href}">
+            <img src="${img[0].querySelector("img").src}">
+            </a>
+            <date>${date}</date>
+            `;
+        }
         else
+        {
+            list.setAttribute("hide","");
+        }
+
+
+        if(list.offsetTop>=window.innerHeight+window.scrollY)
         {
             list.setAttribute("hide","");
         }

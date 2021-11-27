@@ -5,8 +5,22 @@ body{
     display: flex;
 }
 
+div#block{
+    width: 100%;
+    height: 100%;
+    background:#222;
+    opacity: 0.6;
+    display: none;
+    transition-duration: 1s;
+    position: fixed;
+    cursor:wait;
+    z-index: 99;
+}
+
+
 div#menu{
     width: 10%;
+    position: fixed;
 }
 
 div#menu>div{
@@ -21,12 +35,15 @@ div#menu div{
 
 div#main{
     padding: 10px;
+    margin-left: 10%;
 }
 
 
-div#main>div>div.yt{
-    width: auto;
+div#main>div>div.yt,
+div#main>div>div.nh{
+    width: 490px;
     height: 422px;
+    overflow: hidden;
     border-radius: 4px;
     border: 2px solid #000;
     margin: 5px;
@@ -34,20 +51,40 @@ div#main>div>div.yt{
     display: inline-grid;
     font-size: 8px;
 }
-div#main>div>div.yt yt_title{
+div#main>div>div.yt[hide],
+div#main>div>div.nh[hide]{
+    display:none;
+}
+
+
+div#main>div>div.yt yt_title,
+div#main>div>div.nh yt_title{
     display: block;
     height: 20px;
     width: 480px;
     overflow: hidden;
 }
-div#main>div>div.yt date{
+div#main>div>div.yt date,
+div#main>div>div.nh date{
     display: block;
     margin: 10px 0 0 0;
     font-size: 16px;
 }
-div#main>div>div.yt img{
+div#main>div>div.yt img,
+div#main>div>div.nh img{
     cursor: pointer;
 }
+
+div#main>div>div.nh img{
+    height: 380px;
+}
+
+div#keyword_search input[type=text]{
+    width: 100%;
+    border-radius: 4px;
+    border: 2px solid #000;
+}
+
 
 [iframe]{
     display: grid;
@@ -77,16 +114,6 @@ input[type=button]:hover{
     color: #fff;
 }
 
-div#block{
-    width: 100%;
-    height: 100%;
-    background:#222;
-    opacity: 0.6;
-    display: none;
-    transition-duration: 1s;
-    position: fixed;
-    cursor:wait;
-}
 
 table{
     width: 100%;
