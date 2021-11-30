@@ -24,7 +24,7 @@ function PlurkApi( opt = {})
     
 
     var api_row = [
-        "content&","limited_to","no_comments&","&plurk_id","count&","from_response&","&response_id"
+        "content&","limited_to&","no_comments&","&plurk_id","count&","from_response&","&response_id"
     ];
 
     this.Send = ()=>{
@@ -80,6 +80,7 @@ function PlurkApi( opt = {})
                 this.arg.content+
                 this.arg.limited_to+
                 this.arg.no_comments+"oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0&qualifier="+encodeURIComponent(":");
+
             break;
 
             case "Timeline/plurkDelete":

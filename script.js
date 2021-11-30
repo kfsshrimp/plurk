@@ -60,31 +60,69 @@ var ALL = {
     "obj":{},
     "loading":false,
     "config":{
+        "plurk_id":PlurkId("onburz"),
         "api":new PlurkApi({
             act:"Timeline/getPlurk",
             arg:{
                 plurk_id:PlurkId("onburz"),
             },
             func:function(xml){
-                var plurk = JSON.parse((xml.response));
-                ALL.config.plurk[ plurk.plurk.plurk_id ] = plurk;
 
-                ALL.config.api.act = "Responses/get";
-                ALL.config.api.func = function(xml){
-                    
-                    var replurk = JSON.parse((xml.response));
-                    for(var r_id in replurk.responses)
-                    {
-                        let f_data = replurk.responses[r_id];
-                        if(f_data.user_id!==plurk.plurk.user_id) continue;
+                setTimeout(()=>{ 
+                    var plurk = JSON.parse((xml.response));
 
-                        ALL.config.plurk[ f_data.plurk_id ].responses = 
-                        ALL.config.plurk[ f_data.plurk_id ].responses||{};
+                    ALL.config.plurk[ plurk.plurk.plurk_id ] = plurk;
 
-                        ALL.config.plurk[ f_data.plurk_id ].responses[ f_data.id ] = f_data;
+                    ALL.config.api.act = "Responses/get";
+                    ALL.config.api.func = function(xml){
+                        
+                        var replurk = JSON.parse((xml.response));
+                        for(var r_id in replurk.responses)
+                        {
+                            let f_data = replurk.responses[r_id];
+                            if(f_data.user_id!==plurk.plurk.user_id) continue;
+
+                            ALL.config.plurk[ f_data.plurk_id ].responses = 
+                            ALL.config.plurk[ f_data.plurk_id ].responses||{};
+
+                            ALL.config.plurk[ f_data.plurk_id ].responses[ f_data.id ] = f_data;
+                        }
+
+
+                        var plurk_id_list = [
+                            //"omkzh9",
+                            //"of50t3",
+                            //"no5x7f",
+                            /*"noplba",
+                            "npiqwi",
+                            "nqdwra",
+                            "o1vtlu",
+                            "o5oq3y"
+                            */ 
+                        ];
+                        for(var i in ALL.config.plurk[ ALL.config.plurk_id ].responses)
+                        {
+                            var f_data = ALL.config.plurk[ ALL.config.plurk_id ].responses[i];
+                            f_data_content = JSON.parse(decodeHTML(f_data.content));
+                            console.log(f_data);
+
+                            plurk_id_list.push(f_data_content.id);
+
+                            if(document.querySelector("#setting ul"))
+                            document.querySelector("#setting ul").innerHTML += `
+                                <li><a target="_blank" href="https://www.plurk.com/p/${f_data_content.url}">${f_data_content.title}</a> (<a data-setting_act="edit_plurk" id="${f_data.id}">刪除</a>)</li>
+                            `;
+
+                        }
+                        plurk_id_list.map(a=>{return PlurkId(a);});
+                        console.log(plurk_id_list);
+                        
+                        LoadingBlock();
+
+                        ApiGetList( plurk_id_list );
                     }
-                }
-                setTimeout(()=>{ ALL.config.api.Send(); },100);
+                    ALL.config.api.Send(); 
+                },100);
             }
         }),
         "plurk":{}
@@ -93,7 +131,7 @@ var ALL = {
 }
 window.onload = function(){
     
-
+    
     ALL.config.api.Send();
 
 
@@ -127,13 +165,70 @@ window.onload = function(){
 
         if(e.target.dataset.search)
         {
-            Search( e.target.dataset.search );
+            ALL.obj.menu.querySelector("#detail_search input[type=text]").value = e.target.dataset.search;
+            Search( e.target.dataset.search , "" );
         }
 
-        if(e.target.dataset.keyword_search)
+        if(e.target.dataset.detail_search)
         {
-            Search( ALL.obj.menu.querySelector("#keyword_search input[type=text]").value );
+            Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , "" );
         }
+
+        if(e.target.dataset.sort)
+        {
+            Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , e.target.dataset.sort );
+
+            if(e.target.dataset.sort.indexOf("desc")===-1)
+            {
+                e.target.dataset.sort += " desc";
+                e.target.value = e.target.value.replace("↑","↓");
+            }
+            else
+            {
+                e.target.dataset.sort = e.target.dataset.sort.replace("desc","");
+                e.target.value = e.target.value.replace("↓","↑");
+            }
+        }
+
+        if(e.target.dataset.setting_act)
+        {
+            if(e.target.dataset.setting_act==="edit_plurk")
+            {
+                if(confirm(`確定要刪除[${e.target.parentElement.querySelector("a").innerHTML}]嗎`)===false) return;
+                
+
+                ALL.config.api.act = "Responses/responseDelete";
+                ALL.config.api.arg.response_id = e.target.id;
+                ALL.config.api.func = function(){};
+
+                ALL.config.api.Send();
+                e.target.parentElement.remove();
+            }
+
+            if(e.target.dataset.setting_act==="add_plurk")
+            {
+                var plurk_id = prompt("輸入噗浪網址");
+                var title = prompt("輸入標題");
+                
+                if(plurk_id===null || title===null || plurk_id==="" || title==="") return;
+
+                plurk_id = plurk_id.split("/").pop();
+
+
+                ALL.config.api.act = "Responses/responseAdd";
+                ALL.config.api.arg.content = `
+                {"title":"${title}","url":"${plurk_id}","type":"plurk","id":"${PlurkId(plurk_id)}"}
+                `;
+                ALL.config.api.func = function(xml)
+                {
+                    var r = JSON.parse(xml.response);
+                }
+
+                ALL.config.api.Send();
+            }
+        }
+
+
 
         if(e.target.dataset.menu)
         {
@@ -206,16 +301,15 @@ window.onload = function(){
 
     window.addEventListener("scroll",(e)=>{
 
-        var list = document.querySelectorAll("#main>div>div[hide]");
+        var list = document.querySelectorAll("#main>div>div:not([class=''])[hide]");
 
 
         if(window.innerHeight+window.scrollY>=document.body.scrollHeight)
         {
-            var show_count = Math.floor(document.querySelector("#main").offsetWidth / (document.querySelector("#main>div>div").offsetWidth));
+            var show_count = Math.floor(document.querySelector("#main").offsetWidth / (document.querySelector("#main>div>div:not([hide])").offsetWidth));
             for(var i=0;i<show_count;i++)
             {
-                if(list[i])
-                list[i].removeAttribute("hide");
+                if(list[i]) list[i].removeAttribute("hide");
             }
         }
 
@@ -226,20 +320,6 @@ window.onload = function(){
     ALL.api = ALL.api||new PlurkApi();
 
 
-    //ApiGetList( [PlurkId("omkzh9")] );
-
-    var plurk_id_list = [
-        "of50t3",
-        "no5x7f",
-        "noplba",
-        "npiqwi",
-        "nqdwra",
-        "o1vtlu",
-        "o5oq3y",
-        "omkzh9"
-    ].map(a=>{return PlurkId(a);});
-
-    ApiGetList( plurk_id_list );
     
     
 
@@ -249,7 +329,11 @@ window.onload = function(){
 var x = 0;
 function ApiGetList(plurk_id)
 {
-    if(x>99) return;
+    if(x>99 || plurk_id.length===0)
+    {
+        LoadingBlock();
+        return;
+    }
 
     var plurk = {};
 
@@ -257,57 +341,57 @@ function ApiGetList(plurk_id)
     ALL.api.act = "Timeline/getPlurk";
     ALL.api.func = function(xml){
 
-        plurk = JSON.parse((xml.response));
+        setTimeout( ()=>{ 
 
-        if(ALL.plurk[ plurk.plurk.plurk_id ]!==undefined)
-        {
-            console.log("LOOP STOP");
-            return; 
-        }
-        
-        ALL.plurk[ plurk.plurk.plurk_id ] = plurk;
-        ALL.plurk[ plurk.plurk.plurk_id ].api = new PlurkApi({
-            act:"Responses/get",
-            arg:{
-                "plurk_id":plurk.plurk.plurk_id
-            },
-            func:function(xml){
+            plurk = JSON.parse((xml.response));
 
-                ALL.loading = false;
-                var replurk = JSON.parse((xml.response));
-                
-                for(var r_id in replurk.responses)
-                {
-                    let f_data = replurk.responses[r_id];
-                    if(f_data.user_id!==plurk.plurk.user_id) continue;
-
-                    /*
-                    if(f_data.content_raw.indexOf("https://www.plurk.com/")!==-1)
-                    {
-                        ALL.loading = true;
-
-                        let tmp = f_data.content_raw.split("/").pop();
-
-                        setTimeout(()=>{
-                            ApiGetList( [PlurkId(tmp)] );
-                        },1000);
-                    }
-                    */
-
-                    ALL.plurk[ plurk.plurk.plurk_id ].responses = 
-                    ALL.plurk[ plurk.plurk.plurk_id ].responses||{};
-                    
-                    ALL.plurk[ f_data.plurk_id ].responses[ f_data.id ] = f_data;
-                }
-
+            if(ALL.plurk[ plurk.plurk.plurk_id ]!==undefined)
+            {
+                console.log("LOOP STOP");
+                return; 
             }
-        });
+            
+            ALL.plurk[ plurk.plurk.plurk_id ] = plurk;
+            ALL.plurk[ plurk.plurk.plurk_id ].api = new PlurkApi({
+                act:"Responses/get",
+                arg:{
+                    "plurk_id":plurk.plurk.plurk_id
+                },
+                func:function(xml){
 
-        
+                    ALL.loading = false;
+                    var replurk = JSON.parse((xml.response));
+                    
+                    for(var r_id in replurk.responses)
+                    {
+                        let f_data = replurk.responses[r_id];
+                        if(f_data.user_id!==plurk.plurk.user_id) continue;
 
+                        /*
+                        if(f_data.content_raw.indexOf("https://www.plurk.com/")!==-1)
+                        {
+                            ALL.loading = true;
 
-        setTimeout( ()=>{ ALL.plurk[ plurk.plurk.plurk_id ].api.Send(); },1000);
-        
+                            let tmp = f_data.content_raw.split("/").pop();
+
+                            setTimeout(()=>{
+                                ApiGetList( [PlurkId(tmp)] );
+                            },1000);
+                        }
+                        */
+
+                        ALL.plurk[ plurk.plurk.plurk_id ].responses = 
+                        ALL.plurk[ plurk.plurk.plurk_id ].responses||{};
+                        
+                        ALL.plurk[ f_data.plurk_id ].responses[ f_data.id ] = f_data;
+                    }
+
+                }
+            });
+
+            ALL.plurk[ plurk.plurk.plurk_id ].api.Send(); 
+
+        },500);
     }
     ALL.api.Send();
 
@@ -315,6 +399,11 @@ function ApiGetList(plurk_id)
     if(plurk_id.length>0)
     {
         setTimeout( ()=>{ApiGetList(plurk_id)},1000 );
+    }
+    else
+    {
+        console.log("END");
+        setTimeout( ()=>{LoadingBlock();},1000 );
     }
 
 }
@@ -338,8 +427,8 @@ function MenuCr(path,obj)
 
         if( Array.isArray(menu[key]) )
         {
-            btn.setAttribute("title",menu[key].join(" , "));
-            btn.dataset.search = key+","+menu[key].join(",");
+            btn.setAttribute("title",menu[key].join(" "));
+            btn.dataset.search = key+" "+menu[key].join(" ");
         }
         else
         {
@@ -352,22 +441,41 @@ function MenuCr(path,obj)
         obj.appendChild(div);        
     }
 
-    if(ALL.obj.menu.querySelector("#keyword_search")===null)
+    if(ALL.obj.menu.querySelector("#detail_search")===null)
     {
-        var div = document.createElement("div");
-        div.id = "keyword_search";
 
-        var txt = document.createElement("input");
-        txt.type = "text";
-        var bnt = document.createElement("input");
-        bnt.type = "button";
-        bnt.value = "搜尋";
-        bnt.dataset.keyword_search = "true";
+        obj.innerHTML += `
+        <div id="detail_search">
+            關鍵字搜尋<br>
+            <select>
+            <option value="">搜尋類型</option>
+            <option value="youtu">youtube</option>
+            <option value="nhentai">nhentai</option>
+            </select>
+            <input type="text">
+            <input type="button" value="搜尋" data-detail_search="true">
+        </div>
+        `;
 
-        div.appendChild(txt);
-        div.appendChild(bnt);
 
-        obj.appendChild(div);
+        obj.innerHTML += `
+        <div id="sort_search">
+            排序<br>
+            <input type="button" value="日期 ↑" data-sort="posted">
+        </div>
+        `;
+
+        if(location.hash==="#shrimp" || location.protocol==="file:")
+        obj.innerHTML += `
+        <div id="setting">
+            設定<br>
+            <input type="button" value="新增" data-setting_act="add_plurk">
+            <ul></ul>
+        </div>
+        `;
+
+        
+
     }
 
 
@@ -375,22 +483,23 @@ function MenuCr(path,obj)
 
 
 
-function Search(keyword)
+function Search(keyword,sort)
 {
     var search_result = {};
     for(var id in ALL.plurk)
     {
         for(var r_id in ALL.plurk[id].responses)
-        for(var key in keyword.split(","))
+        for(var key in keyword.split(" "))
         {
-            var str = keyword.split(",")[key];
+            var str = keyword.split(" ")[key];
             if(str==="") continue;
 
             var f_data = ALL.plurk[id].responses[r_id];
 
             if(f_data.user_id!==ALL.plurk[id].plurk.owner_id) continue;
 
-            if(f_data.content.toLocaleLowerCase().indexOf(str.toLocaleLowerCase())!==-1)
+            if(f_data.content.toLocaleLowerCase().indexOf(str.toLocaleLowerCase())!==-1 && 
+            f_data.content.toLocaleLowerCase().indexOf(document.querySelector("#detail_search select").value)!==-1 )
             {
                 search_result[ f_data.id ] = f_data;
             }
@@ -406,6 +515,10 @@ function Search(keyword)
     var tr,td;
     */
 
+    search_result = JsonToList(search_result,sort);
+
+    console.log(search_result);
+
     var div = document.createElement("div");
     
     for(var id in search_result)
@@ -413,7 +526,8 @@ function Search(keyword)
         var f_data = search_result[ id ];
 
         var list = document.createElement("div");
-        list.id = id;
+        list.id = f_data.id;
+        list.dataset.plurk_id = f_data.plurk_id;
 
         list.innerHTML = 
         `${f_data.content}<BR><date>${DateF(( f_data.posted ))}</date>`;
@@ -439,7 +553,6 @@ function Search(keyword)
 
 
 
-
     for(var idx=0;idx<div.querySelectorAll("div").length;idx++)
     {
         var list = div.querySelectorAll("div")[idx];
@@ -457,6 +570,9 @@ function Search(keyword)
         
         if(content_type==="yt")
         {
+            if(document.querySelector("#detail_search select").value==="nh")
+                list.setAttribute("hide","");
+
             var title = list.querySelector("a").text;
             var img = list.querySelector("img").src;
             var date = list.querySelector("date").innerHTML;
@@ -478,11 +594,13 @@ function Search(keyword)
         }
         else if(content_type==="nh")
         {
+            if(document.querySelector("#detail_search select").value==="yt")
+                list.setAttribute("hide","");
+
             var url = list.querySelectorAll("a:not([class*=pictureservices])");
-            var title = list.text;
             var img = list.querySelectorAll("a[class*=pictureservices]");
             var date = list.querySelector("date").innerHTML;
-            var plurk_id = (search_result[list.id].plurk_id).toString(36);
+            var plurk_id = parseInt(list.dataset.plurk_id).toString(36);
 
             for(var i=0;i<img.length;i++)
             {
@@ -549,4 +667,42 @@ function DateF(date)
 }
 
 
+function JsonToList(json,sort)
+{
+    var list = [];
+    for(var id in json)
+    {
+        var i = list.length;
+        list[i] = json[id];
+    }
 
+    
+    list.sort((a,b)=>{
+
+        var desc = false;
+        var s = sort.toString().split(" ");
+        if(s.indexOf("desc")!==-1) desc = true;
+
+        a = a[s["0"]];
+        b = b[s["0"]];
+
+        if(s["0"]==="posted")
+        {
+            a = new Date(a).getTime();
+            b = new Date(b).getTime();
+        }
+
+        if(desc)
+            return a - b;
+        else
+            return b - a;
+    });
+
+    return list;
+}
+
+function decodeHTML(html) {
+	var txt = document.createElement('textarea');
+	txt.innerHTML = html;
+	return txt.value;
+};

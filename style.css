@@ -3,6 +3,43 @@ body{
     margin: 0px;
     padding: 0px;
     display: flex;
+    font-size: 8px;
+}
+
+
+[iframe]{
+    display: grid;
+    background: #aaa;
+    border: 2px solid #000;
+    padding: 10px;
+    position: absolute;
+    resize: both;
+}
+
+[hide]{
+    display: none;
+}
+
+iframe{
+    resize: both;
+}
+
+input[type=button]{
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 2px;
+}
+
+input[type=button]:hover{
+    background: #00f;
+    color: #fff;
+}
+
+a{
+    cursor: pointer;
+}
+a:hover{
+    color: #f00;
 }
 
 div#block{
@@ -49,7 +86,6 @@ div#main>div>div.nh{
     margin: 5px;
     padding: 5px;
     display: inline-grid;
-    font-size: 8px;
 }
 div#main>div>div.yt[hide],
 div#main>div>div.nh[hide]{
@@ -79,45 +115,26 @@ div#main>div>div.nh img{
     height: 380px;
 }
 
-div#keyword_search input[type=text]{
+div#detail_search input[type=text]{
+    width: 100%;
+    border-radius: 4px;
+    border: 2px solid #000;
+}
+
+div#detail_search select{
     width: 100%;
     border-radius: 4px;
     border: 2px solid #000;
 }
 
 
-[iframe]{
-    display: grid;
-    background: #aaa;
-    border: 2px solid #000;
-    padding: 10px;
-    position: absolute;
-    resize: both;
-}
-
-[hide]{
-    display: none;
-}
-
-iframe{
-    resize: both;
-}
-
-input[type=button]{
-    border-radius: 4px;
-    cursor: pointer;
-    margin: 2px;
-}
-
-input[type=button]:hover{
-    background: #00f;
-    color: #fff;
-}
 
 
-table{
+ul{
+    list-style: none;
     width: 100%;
+    padding: 0px;
 }
-table tr td{
-    border: 1px solid #000;
+ul li{
+    margin-top: 4px;
 }
