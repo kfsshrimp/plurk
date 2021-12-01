@@ -58,7 +58,9 @@ var ALL = {
     "api":null,
     "plurk":{},
     "obj":{},
-    "loading":false,
+    "timer":{
+        "count":new Date().getTime()
+    },
     "config":{
         "plurk_id":PlurkId("onburz"),
         "api":new PlurkApi({
@@ -116,12 +118,28 @@ var ALL = {
                         }
                         plurk_id_list.map(a=>{return PlurkId(a);});
                         console.log(plurk_id_list);
-                        
-                        LoadingBlock();
 
+                        var total_sec = plurk_id_list.length * 1 * 1000;
+                        var progress = 0;
+                        var p = ALL.obj.block.querySelector("div");
+                        console.log(total_sec);
+
+                        var _t = setInterval(()=>{
+                            p.style.background = `linear-gradient(to right,#0f0 ${progress+=1}%,#fff 0%)`;
+                            p.innerText = `${progress}%`;
+                                                    
+                            if(progress>=100)
+                            {
+                                clearInterval(_t);
+                                LoadingBlock();
+                            }
+                        },(total_sec/100));
+                        
+                        ALL.timer.time1 = new Date().getTime();
                         ApiGetList( plurk_id_list );
                     }
-                    ALL.config.api.Send(); 
+                    ALL.config.api.Send();
+
                 },100);
             }
         }),
@@ -131,7 +149,8 @@ var ALL = {
 }
 window.onload = function(){
     
-    
+    ALL.api = ALL.api||new PlurkApi();
+
     ALL.config.api.Send();
 
 
@@ -141,6 +160,12 @@ window.onload = function(){
     {
         ALL.obj.block = document.createElement("div");
         ALL.obj.block.id = "block";
+        ALL.obj.block.style.display = "block";
+
+        var progress = document.createElement("div");
+        progress.style.background = "linear-gradient(to right,#0f0 0%,#fff 0%";
+        ALL.obj.block.appendChild(progress);
+
         document.body.appendChild(ALL.obj.block);
     }
 
@@ -317,7 +342,7 @@ window.onload = function(){
     });
 
 
-    ALL.api = ALL.api||new PlurkApi();
+    
 
 
     
@@ -359,7 +384,7 @@ function ApiGetList(plurk_id)
                 },
                 func:function(xml){
 
-                    ALL.loading = false;
+                    
                     var replurk = JSON.parse((xml.response));
                     
                     for(var r_id in replurk.responses)
@@ -403,7 +428,9 @@ function ApiGetList(plurk_id)
     else
     {
         console.log("END");
-        setTimeout( ()=>{LoadingBlock();},1000 );
+        ALL.timer.time2 = new Date().getTime();
+        ALL.timer.time3 = ALL.timer.time2 - ALL.timer.time1;
+        //setTimeout( ()=>{LoadingBlock();},1000 );
     }
 
 }
@@ -641,15 +668,19 @@ function LoadingBlock()
 {
     if(ALL.obj.block.style.display==="block")
     {
+        document.body.style.background = "#aaa";
         ALL.obj.block.style.opacity = "0";
         setTimeout(()=>{
             ALL.obj.block.style.display = "none";
-        },1000)
+        },1000);
     }
     else
     {
-        ALL.obj.block.style.opacity = "1";
+        
         ALL.obj.block.style.display = "block";
+        setTimeout(()=>{
+            ALL.obj.block.style.opacity = "1";
+        },0);
     }
 }
 
