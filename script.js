@@ -42,16 +42,48 @@ var ALL = {
                     "常闇トワ":["TOWA","TMT"],
                     "姫森ルーナ":["LUNA","露娜"]
                 },
-                "4期生":{
+                "5期生":{
                     "雪花ラミィ":["雪"],
                     "桃鈴ねね":["捏捏"],
                     "獅白ぼたん":["446","獅"],
                     "尾丸ポルカ":["座長","尾丸"]
-                }
+                },
+                "6期生":{
+                    "ラプラス・ダークネス":["總帥"],
+                    "鷹嶺ルイ":[""],
+                    "博衣こより":[""],
+                    "沙花叉クロヱ":[""],
+                    "風真いろは":[""]
+                },
             },
-            "EN":
-            {
-                "Ninomae Ina'nis":["ina"]
+            "EN":{
+                "1期生":{
+                    "森カリオペ":[""],
+                    "小鳥遊キアラ":["Kiara"],
+                    "一伊那尓栖":["ina"],
+                    "がうる・ぐら":[""],
+                    "ワトソン・アメリア":[""]
+                },
+                "2期生":{
+                    "九十九佐命":[""],
+                    "セレス・ファウナ":[""],
+                    "オーロ・クロニー":["ina"],
+                    "七詩ムメイ":[""],
+                    "ハコス・ベールズ":[""]
+                },
+                "IRyS":[""]
+            },
+            "ID":{
+                "1期生":{
+                    "Ayunda Risu":[""],
+                    "Moona Hoshinova":[""],
+                    "Airani Iofifteen":[""]
+                },
+                "2期生":{
+                    "Kureiji Ollie":[""],
+                    "Anya Melfissa":[""],
+                    "Pavolia Reine":[""]
+                }
             }
         }
     },
@@ -131,7 +163,7 @@ var ALL = {
                             if(progress>=100)
                             {
                                 clearInterval(_t);
-                                LoadingBlock();
+                                setTimeout(()=>{LoadingBlock();},100);
                             }
                         },(total_sec/100));
                         
@@ -152,8 +184,6 @@ window.onload = function(){
     ALL.api = ALL.api||new PlurkApi();
 
     ALL.config.api.Send();
-
-
 
     ALL.obj.block = document.querySelector("#block");
     if(ALL.obj.block===null)
@@ -177,7 +207,7 @@ window.onload = function(){
         document.body.appendChild(ALL.obj.menu);
     }
 
-    ALL.obj.main = document.querySelector("#list");
+    ALL.obj.main = document.querySelector("#main");
     if(ALL.obj.main===null)
     {
         ALL.obj.main = document.createElement("div");
@@ -185,18 +215,30 @@ window.onload = function(){
         document.body.appendChild(ALL.obj.main);
     }
 
+    ALL.obj.top_bar = document.querySelector("#top_bar");
+    if(ALL.obj.top_bar===null)
+    {
+        ALL.obj.top_bar = document.createElement("div");
+        ALL.obj.top_bar.id = "top_bar";
+        ALL.obj.top_bar.dataset.setting_act = "top";
+        ALL.obj.top_bar.innerHTML = `▲`;
+        document.body.appendChild(ALL.obj.top_bar);
+    }
+
+
 
     window.addEventListener("click",(e)=>{
 
         if(e.target.dataset.search)
         {
             ALL.obj.menu.querySelector("#detail_search input[type=text]").value = e.target.dataset.search;
-            Search( e.target.dataset.search , "" );
+            document.querySelector("#detail_search select").value = "youtu";
+            Search( e.target.dataset.search ,  "posted" );
         }
 
         if(e.target.dataset.detail_search)
         {
-            Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , "" );
+            Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , "posted" );
         }
 
         if(e.target.dataset.sort)
@@ -251,12 +293,29 @@ window.onload = function(){
 
                 ALL.config.api.Send();
             }
+
+            if(e.target.dataset.setting_act==="top")
+            {
+                document.body.scrollTo(0,0);
+            }
+
         }
 
 
 
         if(e.target.dataset.menu)
         {
+            if(e.target.parentElement.querySelector("div")!==null)
+            {
+                var child = e.target.parentElement.querySelectorAll("div");
+                for(var i=0;i<child.length;i++)
+                {
+                    (child[i].getAttribute("hide")!==null)?
+                    child[i].removeAttribute("hide"):child[i].setAttribute("hide","");
+                }
+            }
+
+
             var path = e.target.dataset.menu;
             var menu = ALL;
             
@@ -341,11 +400,6 @@ window.onload = function(){
 
     });
 
-
-    
-
-
-    
     
 
     MenuCr("MENU",ALL.obj.menu);
@@ -488,7 +542,7 @@ function MenuCr(path,obj)
         obj.innerHTML += `
         <div id="sort_search">
             排序<br>
-            <input type="button" value="日期 ↑" data-sort="posted">
+            <input type="button" value="日期 ↑" data-sort="posted desc">
         </div>
         `;
 
@@ -500,9 +554,6 @@ function MenuCr(path,obj)
             <ul></ul>
         </div>
         `;
-
-        
-
     }
 
 
@@ -525,15 +576,26 @@ function Search(keyword,sort)
 
             if(f_data.user_id!==ALL.plurk[id].plurk.owner_id) continue;
 
-            if(f_data.content.toLocaleLowerCase().indexOf(str.toLocaleLowerCase())!==-1 && 
-            f_data.content.toLocaleLowerCase().indexOf(document.querySelector("#detail_search select").value)!==-1 )
+            var content = f_data.content.toLocaleLowerCase();
+            var type = document.querySelector("#detail_search select").value.toLocaleLowerCase();
+            var tag = f_data.content_raw.split("\n")[0].toLocaleLowerCase();
+            var str = str.toLocaleLowerCase();
+
+            f_data.tag = (f_data.content_raw.split("\n").length>1)?tag:"";
+            
+
+            if(
+                (
+                    tag.indexOf(str)!==-1 || 
+                    content.indexOf(str)!==-1
+                ) && 
+                    content.indexOf(type)!==-1 
+            )
             {
                 search_result[ f_data.id ] = f_data;
             }
         }
     }
-
-    console.log(search_result);
 
     ALL.obj.main.innerHTML = "";
     
@@ -541,10 +603,11 @@ function Search(keyword,sort)
     var table = document.createElement("table");
     var tr,td;
     */
+   console.log(search_result);
+
 
     search_result = JsonToList(search_result,sort);
 
-    console.log(search_result);
 
     var div = document.createElement("div");
     
@@ -557,7 +620,7 @@ function Search(keyword,sort)
         list.dataset.plurk_id = f_data.plurk_id;
 
         list.innerHTML = 
-        `${f_data.content}<BR><date>${DateF(( f_data.posted ))}</date>`;
+        `${f_data.content}<BR><date>${DateF(( f_data.posted ))}</date><tag>${f_data.tag}</tag>`;
 
         div.appendChild(list);
 
@@ -579,10 +642,11 @@ function Search(keyword,sort)
     ALL.obj.main.appendChild(div);
 
 
+    console.log(search_result);
 
-    for(var idx=0;idx<div.querySelectorAll("div").length;idx++)
+    for(var idx=0;idx<div.querySelectorAll("div[id]").length;idx++)
     {
-        var list = div.querySelectorAll("div")[idx];
+        var list = div.querySelectorAll("div[id]")[idx];
 
         var a = list.querySelectorAll("a");
 
@@ -594,6 +658,8 @@ function Search(keyword,sort)
         }
         list.className = content_type;
 
+        console.log(list);
+
         
         if(content_type==="yt")
         {
@@ -603,6 +669,8 @@ function Search(keyword,sort)
             var title = list.querySelector("a").text;
             var img = list.querySelector("img").src;
             var date = list.querySelector("date").innerHTML;
+            var plurk_id = parseInt(list.dataset.plurk_id).toString(36);
+            var tag = list.querySelector("tag").innerHTML;
             img = img.split("/");
             var yt_id = img["4"];
             img.pop();
@@ -610,6 +678,8 @@ function Search(keyword,sort)
             img = img.join("/");
 
             list.innerHTML = `
+            <a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>
+            <tag>${tag}</tag>
             <a target="_blank" href="${a[0].href}">
             <yt_title>${title}</yt_title>
             </a>
@@ -628,6 +698,7 @@ function Search(keyword,sort)
             var img = list.querySelectorAll("a[class*=pictureservices]");
             var date = list.querySelector("date").innerHTML;
             var plurk_id = parseInt(list.dataset.plurk_id).toString(36);
+            var tag = list.querySelector("tag").innerHTML;
 
             for(var i=0;i<img.length;i++)
             {
@@ -641,6 +712,7 @@ function Search(keyword,sort)
 
             list.innerHTML = `
             <a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>
+            <tag>${tag}</tag>
             <a target="_blank" href="${url[0].href}">
             <img src="${img[0].querySelector("img").src}">
             </a>
@@ -653,11 +725,16 @@ function Search(keyword,sort)
         }
 
 
-        if(list.offsetTop>=window.innerHeight+window.scrollY)
+        if(
+            list.offsetTop>=window.innerHeight+window.scrollY && 
+            ![/Android/i,/webOS/i,/iPhone/i,/iPad/i,/iPod/i,/BlackBerry/i,/Windows Phone/i].some((x)=>{return navigator.userAgent.match(x);})
+            )
         {
             list.setAttribute("hide","");
         }
     }
+
+    document.body.scrollTo(0,0);
 
     //ALL.obj.main.appendChild(table);
 }

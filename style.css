@@ -56,7 +56,7 @@ div#block{
 }
 
 div#block div{
-    margin-top: 33%;
+    margin-top: 1%;
     width: 100%;
     background: #00f;
     height: 20px;
@@ -65,10 +65,30 @@ div#block div{
     color: #000;
 }
 
+div#top_bar{
+    width: 30px;
+    height: 30px;
+    background: #eee;
+    border-radius: 6px;
+    border: 1px solid #000;
+    position: fixed;
+    left: 98%;
+    float: right;
+    top: 5px;
+    font-size: 28px;
+    color: #000;
+    cursor: pointer;
+}
+
+div#top_bar:hover{
+    background: #00f;
+    color: #fff;
+}
+
 
 div#menu{
-    width: 10%;
     position: fixed;
+    width: 5%;
 }
 
 div#menu>div{
@@ -78,8 +98,6 @@ div#menu>div{
 div#menu div{
     padding-left:10%;
 }
-
-
 
 div#main{
     padding: 10px;
@@ -104,19 +122,25 @@ div#main>div>div.nh[hide]{
 }
 
 
-div#main>div>div.yt yt_title,
-div#main>div>div.nh yt_title{
+yt_title{
     display: block;
     height: 20px;
     width: 480px;
     overflow: hidden;
 }
-div#main>div>div.yt date,
-div#main>div>div.nh date{
+date{
     display: block;
     margin: 10px 0 0 0;
     font-size: 16px;
 }
+tag{
+    display: block;
+    height: 20px;
+    width: 480px;
+    overflow: hidden;
+}
+
+
 div#main>div>div.yt img,
 div#main>div>div.nh img{
     cursor: pointer;
