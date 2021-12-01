@@ -55,7 +55,7 @@ function PlurkApi( opt = {})
             if(key.substr(0,1)==="&" && !!this.arg[word]) this.arg[word] = "&"+this.arg[word];
             if(key.substr(-1,1)==="&" && !!this.arg[word]) this.arg[word] = this.arg[word]+"&";
         }
-        console.log(this.arg);
+        console.log(this);
         
 
         switch (this.act)
@@ -157,7 +157,6 @@ function XmlSend(SBS,act,func)
     var url = System.CORS + ("app="+act+"&oauth_signature="+oauth_signature +"&"+ SBS);
 
     console.log(url);
-
     var xml;
     xml = new XMLHttpRequest();
     xml.open("GET",url, System.XmlAsync );

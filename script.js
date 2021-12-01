@@ -2,6 +2,7 @@ var ALL = {
     "MENU":{
         "HOLO":{
             "JP":{
+                "友人A":["A醬","えーちゃん"],
                 "0期生":{
                     "ときのそら":["空媽"],
                     "AZKi":["AZKI"],
@@ -52,8 +53,8 @@ var ALL = {
                     "ラプラス・ダークネス":["總帥"],
                     "鷹嶺ルイ":[""],
                     "博衣こより":[""],
-                    "沙花叉クロヱ":[""],
-                    "風真いろは":[""]
+                    "沙花叉クロヱ":["虎鯨"],
+                    "風真いろは":["狗扎魯"]
                 },
             },
             "EN":{
@@ -107,9 +108,12 @@ var ALL = {
 
                     ALL.config.plurk[ plurk.plurk.plurk_id ] = plurk;
 
+                    
                     ALL.config.api.act = "Responses/get";
                     ALL.config.api.func = function(xml){
                         
+                        
+
                         var replurk = JSON.parse((xml.response));
                         for(var r_id in replurk.responses)
                         {
@@ -151,7 +155,7 @@ var ALL = {
                         plurk_id_list.map(a=>{return PlurkId(a);});
                         console.log(plurk_id_list);
 
-                        var total_sec = plurk_id_list.length * 1 * 1000;
+                        var total_sec = plurk_id_list.length * 1 * 300;
                         var progress = 0;
                         var p = ALL.obj.block.querySelector("div");
                         console.log(total_sec);
@@ -239,6 +243,12 @@ window.onload = function(){
         if(e.target.dataset.detail_search)
         {
             Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , "posted" );
+        }
+
+        if(e.target.dataset.tag_search)
+        {
+            ALL.obj.menu.querySelector("#detail_search input[type=text]").value = e.target.dataset.tag_search;
+            Search( e.target.dataset.tag_search , "posted" );
         }
 
         if(e.target.dataset.sort)
@@ -408,17 +418,31 @@ window.onload = function(){
 var x = 0;
 function ApiGetList(plurk_id)
 {
-    if(x>99 || plurk_id.length===0)
+    if(x>10 || plurk_id.length===0)
     {
         LoadingBlock();
         return;
     }
 
+
+    //var rrr = new Date().getTime();
     var plurk = {};
 
     ALL.api.arg.plurk_id = plurk_id.pop();
     ALL.api.act = "Timeline/getPlurk";
     ALL.api.func = function(xml){
+
+        //console.log( `RESPONSE${ALL.api.arg.plurk_id}:${new Date().getTime() - rrr}` );
+
+        if(plurk_id.length>0)
+        {
+            ApiGetList(plurk_id);
+        }
+        else
+        {
+            console.log("END");
+            ALL.timer.time2 = new Date().getTime() - ALL.timer.time1;
+        }
 
         setTimeout( ()=>{ 
 
@@ -429,7 +453,7 @@ function ApiGetList(plurk_id)
                 console.log("LOOP STOP");
                 return; 
             }
-            
+
             ALL.plurk[ plurk.plurk.plurk_id ] = plurk;
             ALL.plurk[ plurk.plurk.plurk_id ].api = new PlurkApi({
                 act:"Responses/get",
@@ -438,7 +462,6 @@ function ApiGetList(plurk_id)
                 },
                 func:function(xml){
 
-                    
                     var replurk = JSON.parse((xml.response));
                     
                     for(var r_id in replurk.responses)
@@ -475,6 +498,7 @@ function ApiGetList(plurk_id)
     ALL.api.Send();
 
 
+    /*
     if(plurk_id.length>0)
     {
         setTimeout( ()=>{ApiGetList(plurk_id)},1000 );
@@ -482,10 +506,10 @@ function ApiGetList(plurk_id)
     else
     {
         console.log("END");
-        ALL.timer.time2 = new Date().getTime();
-        ALL.timer.time3 = ALL.timer.time2 - ALL.timer.time1;
+        ALL.timer.time2 = new Date().getTime() - ALL.timer.time1;
         //setTimeout( ()=>{LoadingBlock();},1000 );
     }
+    */
 
 }
 
@@ -570,7 +594,7 @@ function Search(keyword,sort)
         for(var key in keyword.split(" "))
         {
             var str = keyword.split(" ")[key];
-            if(str==="") continue;
+            //if(str==="") continue;
 
             var f_data = ALL.plurk[id].responses[r_id];
 
@@ -670,7 +694,9 @@ function Search(keyword,sort)
             var img = list.querySelector("img").src;
             var date = list.querySelector("date").innerHTML;
             var plurk_id = parseInt(list.dataset.plurk_id).toString(36);
-            var tag = list.querySelector("tag").innerHTML;
+            var tag = list.querySelector("tag").innerHTML.split(" ").map(t=>{
+                return `<a data-tag_search=${t}>${t}</a>`
+            }).join(" ");
             img = img.split("/");
             var yt_id = img["4"];
             img.pop();
@@ -698,7 +724,9 @@ function Search(keyword,sort)
             var img = list.querySelectorAll("a[class*=pictureservices]");
             var date = list.querySelector("date").innerHTML;
             var plurk_id = parseInt(list.dataset.plurk_id).toString(36);
-            var tag = list.querySelector("tag").innerHTML;
+            var tag = list.querySelector("tag").innerHTML.split(" ").map(t=>{
+                return `<a data-tag_search=${t}>${t}</a>`
+            }).join(" ");
 
             for(var i=0;i<img.length;i++)
             {
