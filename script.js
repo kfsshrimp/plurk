@@ -126,14 +126,12 @@ ALL.worker.onmessage = (msg)=>{
             if( document.querySelector("#setting ul") )
             {
                 if(f_data_content.type==="plurk")
-                var html = `
+                document.querySelector("#setting ul").innerHTML += `
                 <li><a target="_blank" href="https://www.plurk.com/p/${f_data_content.url}">${f_data_content.title}</a> (<a data-setting_act="edit_plurk" id="${f_data.id}">刪除</a>)</li>`;
 
                 if(f_data_content.type==="web_count")
-                var html = `<li><a>瀏覽人數：${f_data_content.count}</a></li>`;
+                document.querySelector("#sort_search").parentElement.innerHTML += `<div>瀏覽人數：<a>${f_data_content.count}</a></div>`;
                 
-
-                document.querySelector("#setting ul").innerHTML += html;
             }
         }
     }

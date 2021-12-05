@@ -151,7 +151,7 @@ div#main>div>div.nh img{
 }
 
 div#detail_search input[type=text]{
-    width: 100%;
+    width: 150px;
     border-radius: 4px;
     border: 2px solid #000;
 }
