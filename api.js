@@ -55,7 +55,6 @@ function PlurkApi( opt = {})
             if(key.substr(0,1)==="&" && !!this.arg[word]) this.arg[word] = "&"+this.arg[word];
             if(key.substr(-1,1)==="&" && !!this.arg[word]) this.arg[word] = this.arg[word]+"&";
         }
-        console.log(this);
         
 
         switch (this.act)
@@ -117,6 +116,31 @@ function PlurkApi( opt = {})
             default:
             break;
         }
+
+        /*
+        System.Worker.postMessage( {
+            "SBS":this.SBS,
+            "act":this.act
+        } );
+
+        System.Worker.onmessage = (msg)=>{
+            var xml = msg.data;
+            
+            console.log(xml);
+            if( typeof(this.func)==="function" ) this.func(xml);
+
+            
+            for(var key in this.arg )
+            {
+                this.arg[key] = this.arg[key]||"";
+                
+                this.arg[key] = this.arg[key].split("&").filter(a=>a!=="")[0]||"";
+
+                this.arg[key] = decodeURIComponent( this.arg[key].split("=")[1]||"" );
+            }
+        }
+        */
+
         XmlSend( this.SBS, this.act , this.func );
 
         for(var key in this.arg )
@@ -139,12 +163,14 @@ function PlurkApi( opt = {})
 
 //GET
 function XmlSend(SBS,act,func)
-{    
+{
+
     var STR = "GET&";
     STR += encodeURIComponent("https://www.plurk.com/APP/"+act)+"&";
     STR += encodeURIComponent(SBS);
 
     var oauth_signature = encodeURIComponent( CryptoJS.HmacSHA1(STR,_x()[1] + "&" + _x()[3]).toString( CryptoJS.enc.Base64 ) );
+
 
     //Data url 順序隨意
     //var url = System.CORS + ("https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS);
@@ -157,6 +183,7 @@ function XmlSend(SBS,act,func)
     var url = System.CORS + ("app="+act+"&oauth_signature="+oauth_signature +"&"+ SBS);
 
     console.log(url);
+
     var xml;
     xml = new XMLHttpRequest();
     xml.open("GET",url, System.XmlAsync );

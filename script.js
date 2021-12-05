@@ -34,7 +34,7 @@ var ALL = {
                     "不知火フレア":["火"],
                     "白銀ノエル":["團長"],
                     "宝鐘マリン":["船長"],
-                    "潤羽るしあ":["露西亞"]
+                    "潤羽るしあ":["露西亞","露"]
                 },
                 "4期生":{
                     "天音かなた":["天使","猩"],
@@ -44,46 +44,46 @@ var ALL = {
                     "姫森ルーナ":["LUNA","露娜"]
                 },
                 "5期生":{
-                    "雪花ラミィ":["雪"],
+                    "雪花ラミィ":["雪","拉米","菈米"],
                     "桃鈴ねね":["捏捏"],
                     "獅白ぼたん":["446","獅"],
                     "尾丸ポルカ":["座長","尾丸"]
                 },
                 "6期生":{
-                    "ラプラス・ダークネス":["總帥"],
-                    "鷹嶺ルイ":[""],
-                    "博衣こより":[""],
-                    "沙花叉クロヱ":["虎鯨"],
-                    "風真いろは":["狗扎魯"]
+                    "ラプラス・ダークネス":["總帥","山田"],
+                    "鷹嶺ルイ":["rui"],
+                    "博衣こより":["博衣"],
+                    "沙花叉クロヱ":["虎鯨","沙花叉"],
+                    "風真いろは":["狗扎魯","風真"]
                 },
             },
             "EN":{
                 "1期生":{
-                    "森カリオペ":[""],
+                    "森カリオペ":["cali"],
                     "小鳥遊キアラ":["Kiara"],
                     "一伊那尓栖":["ina"],
-                    "がうる・ぐら":[""],
-                    "ワトソン・アメリア":[""]
+                    "がうる・ぐら":["gura"],
+                    "ワトソン・アメリア":["ame"]
                 },
                 "2期生":{
-                    "九十九佐命":[""],
-                    "セレス・ファウナ":[""],
+                    "九十九佐命":["sana"],
+                    "セレス・ファウナ":["fauna"],
                     "オーロ・クロニー":["ina"],
-                    "七詩ムメイ":[""],
-                    "ハコス・ベールズ":[""]
+                    "七詩ムメイ":["七詩","mumei"],
+                    "ハコス・ベールズ":["kronii"]
                 },
-                "IRyS":[""]
+                "IRyS":[]
             },
             "ID":{
                 "1期生":{
-                    "Ayunda Risu":[""],
-                    "Moona Hoshinova":[""],
-                    "Airani Iofifteen":[""]
+                    "Ayunda Risu":[],
+                    "Moona Hoshinova":[],
+                    "Airani Iofifteen":["iofi"]
                 },
                 "2期生":{
-                    "Kureiji Ollie":[""],
-                    "Anya Melfissa":[""],
-                    "Pavolia Reine":[""]
+                    "Kureiji Ollie":[],
+                    "Anya Melfissa":[],
+                    "Pavolia Reine":[]
                 }
             }
         }
@@ -96,98 +96,86 @@ var ALL = {
     },
     "config":{
         "plurk_id":PlurkId("onburz"),
-        "api":new PlurkApi({
-            act:"Timeline/getPlurk",
-            arg:{
-                plurk_id:PlurkId("onburz"),
-            },
-            func:function(xml){
-
-                setTimeout(()=>{ 
-                    var plurk = JSON.parse((xml.response));
-
-                    ALL.config.plurk[ plurk.plurk.plurk_id ] = plurk;
-
-                    
-                    ALL.config.api.act = "Responses/get";
-                    ALL.config.api.func = function(xml){
-                        
-                        
-
-                        var replurk = JSON.parse((xml.response));
-                        for(var r_id in replurk.responses)
-                        {
-                            let f_data = replurk.responses[r_id];
-                            if(f_data.user_id!==plurk.plurk.user_id) continue;
-
-                            ALL.config.plurk[ f_data.plurk_id ].responses = 
-                            ALL.config.plurk[ f_data.plurk_id ].responses||{};
-
-                            ALL.config.plurk[ f_data.plurk_id ].responses[ f_data.id ] = f_data;
-                        }
-
-
-                        var plurk_id_list = [
-                            //"omkzh9",
-                            //"of50t3",
-                            //"no5x7f",
-                            /*"noplba",
-                            "npiqwi",
-                            "nqdwra",
-                            "o1vtlu",
-                            "o5oq3y"
-                            */ 
-                        ];
-                        for(var i in ALL.config.plurk[ ALL.config.plurk_id ].responses)
-                        {
-                            var f_data = ALL.config.plurk[ ALL.config.plurk_id ].responses[i];
-                            f_data_content = JSON.parse(decodeHTML(f_data.content));
-                            console.log(f_data);
-
-                            plurk_id_list.push(f_data_content.id);
-
-                            if(document.querySelector("#setting ul"))
-                            document.querySelector("#setting ul").innerHTML += `
-                                <li><a target="_blank" href="https://www.plurk.com/p/${f_data_content.url}">${f_data_content.title}</a> (<a data-setting_act="edit_plurk" id="${f_data.id}">刪除</a>)</li>
-                            `;
-
-                        }
-                        plurk_id_list.map(a=>{return PlurkId(a);});
-                        console.log(plurk_id_list);
-
-                        var total_sec = plurk_id_list.length * 1 * 300;
-                        var progress = 0;
-                        var p = ALL.obj.block.querySelector("div");
-                        console.log(total_sec);
-
-                        var _t = setInterval(()=>{
-                            p.style.background = `linear-gradient(to right,#0f0 ${progress+=1}%,#fff 0%)`;
-                            p.innerText = `${progress}%`;
-                                                    
-                            if(progress>=100)
-                            {
-                                clearInterval(_t);
-                                setTimeout(()=>{LoadingBlock();},100);
-                            }
-                        },(total_sec/100));
-                        
-                        ALL.timer.time1 = new Date().getTime();
-                        ApiGetList( plurk_id_list );
-                    }
-                    ALL.config.api.Send();
-
-                },100);
-            }
-        }),
+        "api":null,
         "plurk":{}
     }
-
 }
-window.onload = function(){
-    
-    ALL.api = ALL.api||new PlurkApi();
 
-    ALL.config.api.Send();
+ALL.worker = new Worker("worker_xml.js");
+
+
+ALL.worker.onmessage = (msg)=>{
+    
+    var mode = msg.data.mode;
+    console.log(`mode:${mode}`)
+
+    if(mode==="config")
+    {
+        ALL.config.plurk = msg.data.r;
+
+        for(var i in ALL.config.plurk[ ALL.config.plurk_id ].responses)
+        {
+            var f_data = ALL.config.plurk[ ALL.config.plurk_id ].responses[i];
+            f_data_content = JSON.parse(
+                
+                unescape( f_data.content_raw.replaceAll("\n","").trim())
+
+            );
+            
+
+            if(document.querySelector("#setting ul"))
+            document.querySelector("#setting ul").innerHTML += `
+                <li><a target="_blank" href="https://www.plurk.com/p/${f_data_content.url}">${f_data_content.title}</a> (<a data-setting_act="edit_plurk" id="${f_data.id}">刪除</a>)</li>
+            `;
+        }
+    }
+
+    if(mode==="plurk")
+    {
+        console.log(msg)
+        ALL.plurk = msg.data.r;
+    }
+
+
+    if(mode==="plurk_id_count")
+    {
+        console.log(msg.data.r);
+
+        var total_sec = msg.data.r.length * 1000;
+        var progress = 0;
+        var p = ALL.obj.block.querySelector("div");
+
+        console.log(total_sec/100);
+
+        var _t = setInterval(()=>{
+            p.style.background = `linear-gradient(to right,#0f0 ${progress+=1}%,#fff 0%)`;
+            p.innerText = `${progress}%`;
+                                    
+            if(progress>=100)
+            {
+                clearInterval(_t);
+                setTimeout(()=>{LoadingBlock();},500);
+            }
+        },(total_sec/100));
+    }
+
+
+};
+
+
+
+
+
+window.onload = function(){
+
+    ALL.config.api = new PlurkApi({
+        "arg":{
+            "plurk_id":ALL.config.plurk_id
+        }
+    });
+    //ALL.config.api.Send();
+    //ALL.api = new PlurkApi();
+
 
     ALL.obj.block = document.querySelector("#block");
     if(ALL.obj.block===null)
@@ -228,8 +216,6 @@ window.onload = function(){
         ALL.obj.top_bar.innerHTML = `▲`;
         document.body.appendChild(ALL.obj.top_bar);
     }
-
-
 
     window.addEventListener("click",(e)=>{
 
@@ -410,106 +396,20 @@ window.onload = function(){
 
     });
 
-    
-
     MenuCr("MENU",ALL.obj.menu);
-}
-
-var x = 0;
-function ApiGetList(plurk_id)
-{
-    if(x>10 || plurk_id.length===0)
-    {
-        LoadingBlock();
-        return;
-    }
 
 
-    //var rrr = new Date().getTime();
-    var plurk = {};
 
-    ALL.api.arg.plurk_id = plurk_id.pop();
-    ALL.api.act = "Timeline/getPlurk";
-    ALL.api.func = function(xml){
-
-        //console.log( `RESPONSE${ALL.api.arg.plurk_id}:${new Date().getTime() - rrr}` );
-
-        if(plurk_id.length>0)
-        {
-            ApiGetList(plurk_id);
-        }
-        else
-        {
-            console.log("END");
-            ALL.timer.time2 = new Date().getTime() - ALL.timer.time1;
-        }
-
-        setTimeout( ()=>{ 
-
-            plurk = JSON.parse((xml.response));
-
-            if(ALL.plurk[ plurk.plurk.plurk_id ]!==undefined)
-            {
-                console.log("LOOP STOP");
-                return; 
-            }
-
-            ALL.plurk[ plurk.plurk.plurk_id ] = plurk;
-            ALL.plurk[ plurk.plurk.plurk_id ].api = new PlurkApi({
-                act:"Responses/get",
-                arg:{
-                    "plurk_id":plurk.plurk.plurk_id
-                },
-                func:function(xml){
-
-                    var replurk = JSON.parse((xml.response));
-                    
-                    for(var r_id in replurk.responses)
-                    {
-                        let f_data = replurk.responses[r_id];
-                        if(f_data.user_id!==plurk.plurk.user_id) continue;
-
-                        /*
-                        if(f_data.content_raw.indexOf("https://www.plurk.com/")!==-1)
-                        {
-                            ALL.loading = true;
-
-                            let tmp = f_data.content_raw.split("/").pop();
-
-                            setTimeout(()=>{
-                                ApiGetList( [PlurkId(tmp)] );
-                            },1000);
-                        }
-                        */
-
-                        ALL.plurk[ plurk.plurk.plurk_id ].responses = 
-                        ALL.plurk[ plurk.plurk.plurk_id ].responses||{};
-                        
-                        ALL.plurk[ f_data.plurk_id ].responses[ f_data.id ] = f_data;
-                    }
-
-                }
-            });
-
-            ALL.plurk[ plurk.plurk.plurk_id ].api.Send(); 
-
-        },500);
-    }
-    ALL.api.Send();
+    var progress = 0;
+    var p = ALL.obj.block.querySelector("div");
+    p.innerText = `0%`;
 
 
-    /*
-    if(plurk_id.length>0)
-    {
-        setTimeout( ()=>{ApiGetList(plurk_id)},1000 );
-    }
-    else
-    {
-        console.log("END");
-        ALL.timer.time2 = new Date().getTime() - ALL.timer.time1;
-        //setTimeout( ()=>{LoadingBlock();},1000 );
-    }
-    */
+    ALL.worker.postMessage( {
+        "mode":"config",
+        "config_id":ALL.config.plurk_id
+    } );
+
 
 }
 
@@ -533,7 +433,10 @@ function MenuCr(path,obj)
         if( Array.isArray(menu[key]) )
         {
             btn.setAttribute("title",menu[key].join(" "));
-            btn.dataset.search = key+" "+menu[key].join(" ");
+            if(menu[key].length===0)
+                btn.dataset.search = key;
+            else
+                btn.dataset.search = key+" "+menu[key].join(" ");
         }
         else
         {
@@ -627,7 +530,6 @@ function Search(keyword,sort)
     var table = document.createElement("table");
     var tr,td;
     */
-   console.log(search_result);
 
 
     search_result = JsonToList(search_result,sort);
@@ -682,7 +584,6 @@ function Search(keyword,sort)
         }
         list.className = content_type;
 
-        console.log(list);
 
         
         if(content_type==="yt")
