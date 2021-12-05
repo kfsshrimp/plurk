@@ -162,7 +162,7 @@ ALL.worker.onmessage = (msg)=>{
             
                         ALL.config.api.Send();
 
-                    },2000);
+                    },500);
                 };
                 ALL.config.api.Send();
             }
