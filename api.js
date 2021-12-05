@@ -182,7 +182,7 @@ function XmlSend(SBS,act,func)
     //for firebase cloud function
     var url = System.CORS + ("app="+act+"&oauth_signature="+oauth_signature +"&"+ SBS);
 
-    console.log(url);
+    //console.log(url);
 
     var xml;
     xml = new XMLHttpRequest();

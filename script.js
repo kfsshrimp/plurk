@@ -138,7 +138,6 @@ ALL.worker.onmessage = (msg)=>{
 
     if(mode==="plurk")
     {
-        console.log(msg)
         ALL.plurk = msg.data.r;
 
 
@@ -146,8 +145,6 @@ ALL.worker.onmessage = (msg)=>{
         {
             let f_data = ALL.config.plurk[ ALL.config.plurk_id ].responses[k];
             
-            console.log(f_data.value);
-
             if(f_data.value.type==="web_count")
             {
                 ALL.config.api.act = "Responses/responseDelete";
@@ -161,7 +158,7 @@ ALL.worker.onmessage = (msg)=>{
 
                         ALL.config.api.func = function(xml)
                         {
-                            console.log((xml.response));
+                            //console.log((xml.response));
                         }
             
                         ALL.config.api.Send();
@@ -176,13 +173,9 @@ ALL.worker.onmessage = (msg)=>{
 
     if(mode==="plurk_id_count")
     {
-        console.log(msg.data.r);
-
         var total_sec = msg.data.r.length * 1000;
         var progress = 0;
         var p = ALL.obj.block.querySelector("div");
-
-        console.log(total_sec/100);
 
         var _t = setInterval(()=>{
             p.style.background = `linear-gradient(to right,#0f0 ${progress+=1}%,#fff 0%)`;
@@ -320,7 +313,7 @@ window.onload = function(){
                 {"title":"${title}","url":"${plurk_id}","type":"plurk","id":"${PlurkId(plurk_id)}"}`;
                 ALL.config.api.func = function(xml)
                 {
-                    console.log((xml.response));
+                    //console.log((xml.response));
                 }
 
                 ALL.config.api.Send();
