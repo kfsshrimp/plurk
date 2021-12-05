@@ -73,7 +73,8 @@ onmessage = function(msg){
                                 
                                 unescape( f_data.content_raw.replaceAll("\n","").trim())
                             ));
-
+                            
+                            if(f_data_content.type==="plurk")
                             plurk_id_list.push(f_data_content.id);
                         }
                         plurk_id_list.map(a=>{return PlurkId(a);});
@@ -218,7 +219,6 @@ function ApiGetList(plurk_id)
                 {
                     delete System.plurk[k].api;
                 }
-                console.log(System.plurk);
 
                 postMessage( {
                     "mode":"plurk",

@@ -119,14 +119,22 @@ ALL.worker.onmessage = (msg)=>{
             f_data_content = JSON.parse(
                 
                 unescape( f_data.content_raw.replaceAll("\n","").trim())
-
             );
-            
 
-            if(document.querySelector("#setting ul"))
-            document.querySelector("#setting ul").innerHTML += `
-                <li><a target="_blank" href="https://www.plurk.com/p/${f_data_content.url}">${f_data_content.title}</a> (<a data-setting_act="edit_plurk" id="${f_data.id}">刪除</a>)</li>
-            `;
+            ALL.config.plurk[ ALL.config.plurk_id ].responses[i].value = f_data_content;
+            
+            if( document.querySelector("#setting ul") )
+            {
+                if(f_data_content.type==="plurk")
+                var html = `
+                <li><a target="_blank" href="https://www.plurk.com/p/${f_data_content.url}">${f_data_content.title}</a> (<a data-setting_act="edit_plurk" id="${f_data.id}">刪除</a>)</li>`;
+
+                if(f_data_content.type==="web_count")
+                var html = `<li><a>瀏覽人數：${f_data_content.count}</a></li>`;
+                
+
+                document.querySelector("#setting ul").innerHTML += html;
+            }
         }
     }
 
@@ -134,6 +142,37 @@ ALL.worker.onmessage = (msg)=>{
     {
         console.log(msg)
         ALL.plurk = msg.data.r;
+
+
+        for(var k in ALL.config.plurk[ ALL.config.plurk_id ].responses)
+        {
+            let f_data = ALL.config.plurk[ ALL.config.plurk_id ].responses[k];
+            
+            console.log(f_data.value);
+
+            if(f_data.value.type==="web_count")
+            {
+                ALL.config.api.act = "Responses/responseDelete";
+                ALL.config.api.arg.response_id = f_data.id;
+                ALL.config.api.func = function(){
+        
+                    setTimeout( ()=>{
+                        ALL.config.api.act = "Responses/responseAdd";
+                        ALL.config.api.arg.content = `
+                        {"title":"網站記數器","url":"","type":"web_count","id":"","count":"${parseInt(f_data.value.count)+1}"}`;
+
+                        ALL.config.api.func = function(xml)
+                        {
+                            console.log((xml.response));
+                        }
+            
+                        ALL.config.api.Send();
+
+                    },2000);
+                };
+                ALL.config.api.Send();
+            }
+        }
     }
 
 
@@ -280,11 +319,10 @@ window.onload = function(){
 
                 ALL.config.api.act = "Responses/responseAdd";
                 ALL.config.api.arg.content = `
-                {"title":"${title}","url":"${plurk_id}","type":"plurk","id":"${PlurkId(plurk_id)}"}
-                `;
+                {"title":"${title}","url":"${plurk_id}","type":"plurk","id":"${PlurkId(plurk_id)}"}`;
                 ALL.config.api.func = function(xml)
                 {
-                    var r = JSON.parse(xml.response);
+                    console.log((xml.response));
                 }
 
                 ALL.config.api.Send();
@@ -459,6 +497,7 @@ function MenuCr(path,obj)
             <option value="">搜尋類型</option>
             <option value="youtu">youtube</option>
             <option value="nhentai">nhentai</option>
+            <option value="asmr">ASMR</option>
             </select>
             <input type="text">
             <input type="button" value="搜尋" data-detail_search="true">
