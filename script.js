@@ -113,6 +113,10 @@ ALL.worker.onmessage = (msg)=>{
     {
         ALL.config.plurk = msg.data.r;
 
+        ALL.config.plurk[ ALL.config.plurk_id ].plurk.value = JSON.parse(
+            unescape(ALL.config.plurk[ ALL.config.plurk_id ].plurk.content_raw.replaceAll("\n","").trim())
+        );
+
         for(var i in ALL.config.plurk[ ALL.config.plurk_id ].responses)
         {
             var f_data = ALL.config.plurk[ ALL.config.plurk_id ].responses[i];
@@ -130,9 +134,18 @@ ALL.worker.onmessage = (msg)=>{
                 <li><a target="_blank" href="https://www.plurk.com/p/${f_data_content.url}">${f_data_content.title}</a> (<a data-setting_act="edit_plurk" id="${f_data.id}">刪除</a>)</li>`;                
             }
 
-            if( f_data_content.type==="web_count")
-                document.querySelector("#menu").innerHTML += `<div>瀏覽人數：<a>${f_data_content.count}</a></div>`;
         }
+
+        document.querySelector("#menu").innerHTML += `<div>瀏覽人數：<a>${ALL.config.plurk[ ALL.config.plurk_id ].plurk.value.web_count++}</a></div>`;
+
+
+        ALL.config.api.act = "Timeline/plurkEdit";
+        ALL.config.api.arg.content = `
+        {"web_count":${ALL.config.plurk[ ALL.config.plurk_id ].plurk.value.web_count}}
+        `;
+
+        ALL.config.api.Send();
+
     }
 
     if(mode==="plurk")
@@ -162,7 +175,7 @@ ALL.worker.onmessage = (msg)=>{
             
                         ALL.config.api.Send();
 
-                    },500);
+                    },100);
                 };
                 ALL.config.api.Send();
             }
