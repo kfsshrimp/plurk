@@ -41,7 +41,7 @@ var ALL = {
                     "桐生ココ":["會長","可可"],
                     "角巻わため":["羊"],
                     "常闇トワ":["TOWA","TMT"],
-                    "姫森ルーナ":["LUNA","露娜"]
+                    "姫森ルーナ":["LUNA","露娜","公主"]
                 },
                 "5期生":{
                     "雪花ラミィ":["雪","拉米","菈米"],
@@ -375,13 +375,7 @@ window.onload = function(){
             },1000);
         }
 
-        if(e.target.getAttribute("draggable")===true)
-        {
-            var touchLocation = e.targetTouches[0];
         
-            e.target.style.left = touchLocation.pageX - window.clientWidth/2;
-            e.target.style.top = touchLocation.pageY  - window.clientHeight/3;
-        }
 
         if(e.target.dataset.menu)
         {
@@ -410,7 +404,7 @@ window.onload = function(){
         if(e.target.getAttribute("draggable")=="true")
         {
             e.target.style.left = e.clientX - ALL.mousedown.offsetX;
-            e.target.style.top = e.clientY - ALL.mousedown.offsetY;
+            e.target.style.top = e.clientY - ALL.mousedown.offsetY + window.scrollY;
         }
     });
 
@@ -548,9 +542,28 @@ function Search(keyword,sort)
             var content = f_data.content.toLocaleLowerCase();
             var type = document.querySelector("#detail_search select").value.toLocaleLowerCase();
             var tag = f_data.content_raw.split("\n")[0].toLocaleLowerCase();
+            var tag_not = [];
             var str = str.toLocaleLowerCase();
 
             f_data.tag = (f_data.content_raw.split("\n").length>1)?tag:"";
+            
+
+
+            if( tag.indexOf("not")!==-1 )
+            {
+                tag = tag.split(" ");
+                for(var i in tag)
+                {
+                    if(tag[i].indexOf("not")!==-1)
+                    {
+                        tag_not.push( tag[i].split(":")[1] )
+                        tag[i] = "";
+                    }
+                }
+                tag = tag.join(" ");
+                f_data.tag = tag;
+            }
+
             
 
             if(
@@ -559,6 +572,8 @@ function Search(keyword,sort)
                     content.indexOf(str)!==-1
                 ) && 
                     content.indexOf(type)!==-1 
+                    &&
+                    tag_not.indexOf(str)===-1
             )
             {
                 search_result[ f_data.id ] = f_data;
