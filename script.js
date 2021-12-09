@@ -70,7 +70,7 @@ var ALL = {
                     "セレス・ファウナ":["fauna","Ceres Fauna"],
                     "オーロ・クロニー":["kronii","Ouro Kronii"],
                     "七詩ムメイ":["七詩","mumei","Nanashi Mumei"],
-                    "ハコス・ベールズ":["鼠","Bae","Hakos Baelz"]
+                    "ハコス・ベールズ":["鼠","Hakos Baelz"]
                 },
                 "IRyS":[]
             },
