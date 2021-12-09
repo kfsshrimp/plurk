@@ -143,7 +143,7 @@ ALL.worker.onmessage = (msg)=>{
 
         }
 
-        document.querySelector("#menu").innerHTML += `<div>瀏覽人數：<a>${ALL.config.plurk[ ALL.config.plurk_id ].plurk.value.web_count++}</a></div>`;
+        document.querySelector("#menu").innerHTML += `<div>瀏覽次數：<a>${ALL.config.plurk[ ALL.config.plurk_id ].plurk.value.web_count++}</a></div>`;
 
 
         ALL.config.api.act = "Timeline/plurkEdit";
@@ -293,20 +293,21 @@ window.onload = function(){
 
         if(e.target.dataset.sort)
         {
-            Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , e.target.dataset.sort );
-
-            /*
+            var sort_obj = e.target;
             if(e.target.dataset.sort.indexOf("desc")===-1)
             {
-                e.target.dataset.sort += " desc";
-                e.target.value = e.target.value.replace("↑","↓");
+                sort_obj.dataset.sort = sort_obj.dataset.sort.trim();
+                sort_obj.dataset.sort += " desc";
+                sort_obj.value = sort_obj.value.replace("↑","↓");
             }
             else
             {
-                e.target.dataset.sort = e.target.dataset.sort.replace("desc","");
-                e.target.value = e.target.value.replace("↓","↑");
+                sort_obj.dataset.sort = sort_obj.dataset.sort.replace("desc","");
+                sort_obj.value = sort_obj.value.replace("↓","↑");
             }
-            */
+
+
+            Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , e.target.dataset.sort );
         }
 
         if(e.target.dataset.setting_act)
@@ -519,7 +520,7 @@ function MenuCr(path,obj)
         obj.innerHTML += `
         <div id="sort_search">
             排序<br>
-            <input type="button" value="日期 ↓" data-sort="posted">
+            <input type="button" value="日期 ↑" data-sort="posted">
         </div>
         `;
 
@@ -621,18 +622,7 @@ function Search(keyword,sort)
 
     
 
-    var sort_obj = document.querySelector("[data-sort]");
-    if(sort.indexOf("desc")===-1)
-    {
-        sort_obj.dataset.sort = sort_obj.dataset.sort.trim();
-        sort_obj.dataset.sort += " desc";
-        sort_obj.value = sort_obj.value.replace("↑","↓");
-    }
-    else
-    {
-        sort_obj.dataset.sort = sort_obj.dataset.sort.replace("desc","");
-        sort_obj.value = sort_obj.value.replace("↓","↑");
-    }
+    
 
 
 
