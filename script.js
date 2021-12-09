@@ -32,8 +32,8 @@ var ALL = {
                 "3期生":{
                     "兎田ぺこら":["兔","佩克拉"],
                     "不知火フレア":["火"],
-                    "白銀ノエル":["團長"],
-                    "宝鐘マリン":["船長"],
+                    "白銀ノエル":["團長","團"],
+                    "宝鐘マリン":["船長","船"],
                     "潤羽るしあ":["露西亞","露"]
                 },
                 "4期生":{
@@ -63,7 +63,7 @@ var ALL = {
                     "小鳥遊キアラ":["Kiara","Takanashi Kiara"],
                     "一伊那尓栖":["ina","Ninomae Ina'nis"],
                     "がうる・ぐら":["gura","Gawr Gura"],
-                    "ワトソン・アメリア":["Watson Amelia"]
+                    "ワトソン・アメリア":["Watson Amelia","ame"]
                 },
                 "2期生":{
                     "九十九佐命":["sana","Tsukumo Sana"],
@@ -98,8 +98,15 @@ var ALL = {
         "plurk_id":PlurkId("onburz"),
         "api":null,
         "plurk":{}
-    }
+    },
+    "localStorage":{},
+    "sessionStorage":{}
 }
+
+ALL.localStorage = JSON.parse(localStorage.kfs_plurk||`{}`);
+ALL.sessionStorage = JSON.parse(sessionStorage.kfs_plurk||`{}`);
+
+
 
 ALL.worker = new Worker("worker_xml.js");
 
@@ -261,28 +268,34 @@ window.onload = function(){
 
     window.addEventListener("click",(e)=>{
 
+
+
         if(e.target.dataset.search)
         {
             ALL.obj.menu.querySelector("#detail_search input[type=text]").value = e.target.dataset.search;
             document.querySelector("#detail_search select").value = "youtu";
-            Search( e.target.dataset.search ,  "posted" );
+            var sort_obj = document.querySelector("[data-sort]");
+            Search( e.target.dataset.search ,  sort_obj.dataset.sort );
         }
 
         if(e.target.dataset.detail_search)
         {
-            Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , "posted" );
+            var sort_obj = document.querySelector("[data-sort]");
+            Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , sort_obj.dataset.sort );
         }
 
         if(e.target.dataset.tag_search)
         {
             ALL.obj.menu.querySelector("#detail_search input[type=text]").value = e.target.dataset.tag_search;
-            Search( e.target.dataset.tag_search , "posted" );
+            var sort_obj = document.querySelector("[data-sort]");
+            Search( e.target.dataset.tag_search , sort_obj.dataset.sort );
         }
 
         if(e.target.dataset.sort)
         {
             Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , e.target.dataset.sort );
 
+            /*
             if(e.target.dataset.sort.indexOf("desc")===-1)
             {
                 e.target.dataset.sort += " desc";
@@ -293,6 +306,7 @@ window.onload = function(){
                 e.target.dataset.sort = e.target.dataset.sort.replace("desc","");
                 e.target.value = e.target.value.replace("↓","↑");
             }
+            */
         }
 
         if(e.target.dataset.setting_act)
@@ -505,7 +519,7 @@ function MenuCr(path,obj)
         obj.innerHTML += `
         <div id="sort_search">
             排序<br>
-            <input type="button" value="日期 ↑" data-sort="posted desc">
+            <input type="button" value="日期 ↓" data-sort="posted">
         </div>
         `;
 
@@ -527,12 +541,31 @@ function MenuCr(path,obj)
 function Search(keyword,sort)
 {
     var search_result = {};
+
+    var type = document.querySelector("#detail_search select").value.toLocaleLowerCase();
+
+    if((type==="" || type==="nhentai") && 
+        ALL.sessionStorage.h_confirm!==1)
+    {
+        if(confirm("此搜尋條件或許會出現18X封面,確定要繼續嗎?")===false) return;
+
+        ALL.sessionStorage.h_confirm = 1;
+        sessionStorage.kfs_plurk = JSON.stringify(ALL.sessionStorage);
+    }
+
+    if(type!=="" && type!=="nhentai")
+    {
+        ALL.sessionStorage.h_confirm = 0;
+        sessionStorage.kfs_plurk = JSON.stringify(ALL.sessionStorage);
+    }
+    
+
     for(var id in ALL.plurk)
     {
         for(var r_id in ALL.plurk[id].responses)
         for(var key in keyword.split(" "))
         {
-            var str = keyword.split(" ")[key];
+            var str = keyword.split(" ")[key].toLocaleLowerCase();
             //if(str==="") continue;
 
             var f_data = ALL.plurk[id].responses[r_id];
@@ -540,14 +573,9 @@ function Search(keyword,sort)
             if(f_data.user_id!==ALL.plurk[id].plurk.owner_id) continue;
 
             var content = f_data.content.toLocaleLowerCase();
-            var type = document.querySelector("#detail_search select").value.toLocaleLowerCase();
+            content_text = DelHtmlTag(content);
             var tag = f_data.content_raw.split("\n")[0].toLocaleLowerCase();
             var tag_not = [];
-            var str = str.toLocaleLowerCase();
-
-            f_data.tag = (f_data.content_raw.split("\n").length>1)?tag:"";
-            
-
 
             if( tag.indexOf("not")!==-1 )
             {
@@ -561,15 +589,16 @@ function Search(keyword,sort)
                     }
                 }
                 tag = tag.join(" ");
-                f_data.tag = tag;
             }
+
+            f_data.tag = (f_data.content_raw.split("\n").length>1)?tag:"";
 
             
 
             if(
                 (
                     tag.indexOf(str)!==-1 || 
-                    content.indexOf(str)!==-1
+                    content_text.indexOf(str)!==-1
                 ) && 
                     content.indexOf(type)!==-1 
                     &&
@@ -588,8 +617,23 @@ function Search(keyword,sort)
     var tr,td;
     */
 
-
     search_result = JsonToList(search_result,sort);
+
+    
+
+    var sort_obj = document.querySelector("[data-sort]");
+    if(sort.indexOf("desc")===-1)
+    {
+        sort_obj.dataset.sort = sort_obj.dataset.sort.trim();
+        sort_obj.dataset.sort += " desc";
+        sort_obj.value = sort_obj.value.replace("↑","↓");
+    }
+    else
+    {
+        sort_obj.dataset.sort = sort_obj.dataset.sort.replace("desc","");
+        sort_obj.value = sort_obj.value.replace("↓","↑");
+    }
+
 
 
     var div = document.createElement("div");
@@ -795,8 +839,6 @@ function JsonToList(json,sort)
     return list;
 }
 
-function decodeHTML(html) {
-	var txt = document.createElement('textarea');
-	txt.innerHTML = html;
-	return txt.value;
-};
+function DelHtmlTag(str) {
+    return str.replace(/<(?:.|\s)*?>/g,"");
+}
