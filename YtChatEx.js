@@ -161,7 +161,7 @@ var G = {
             var div = document.createElement("div");
             div.id = message.id;
 
-            div.innerHTML = `<a data-search_time="${message.time}">${message.time}</a> <a>${message.user}</a> <a>${message.msg}</a></div>`            
+            div.innerHTML = `<a data-search_time="${message.sec}">${G.YtCurrentTime(message.sec)}</a> <a>${message.user}</a> <a>${message.msg}</a></div>`            
             G.chat.appendChild(div);
         }
 
