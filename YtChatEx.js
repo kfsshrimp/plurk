@@ -8,6 +8,11 @@ if( typeof(G)!=='undefined' )
 
 var G = {
     "selector":`[author-type="moderator"]`,//
+    "control":{
+        "run":true,
+        "auto_scroll":true,
+        "yt_id":new URLSearchParams(location.search).get("v")
+    },
     "sys_word":{
         "true":"開啟",
         "false":"關閉"
@@ -237,11 +242,6 @@ var G = {
         
         G.timer = setTimeout(()=>{G.chat_ref();},1000);
     },
-    "control":{
-        "run":true,
-        "auto_scroll":true,
-        "yt_id":new URLSearchParams(location.search).get("v")
-    },
     "menu_set":()=>{
 
         G.menu = (!document.querySelector("#kfsshrimp_menu"))?document.createElement("div"):document.querySelector("#kfsshrimp_menu");
@@ -286,11 +286,9 @@ var G = {
             var msg = G.chat.children[i];
 
 
-
             list[ msg.id ] = {
                 "id":msg.id,
-                "sec":G.YtCurrentTime(msg.querySelectorAll("a")[0].innerText.split(":")),
-                "time":msg.querySelectorAll("a")[0].innerText,
+                "sec":msg.querySelectorAll("a")[0].dataset.search_time,
                 "user":msg.querySelectorAll("a")[1].innerText,
                 "msg":msg.querySelectorAll("a")[2].innerHTML
             }
