@@ -1,9 +1,3 @@
-/*
-scroll stop G.stop = true;捲動停止自動scroll到底
-start again G.stop = false;新增按鈕開始自動scroll到底
-顯示秒數表示正在追蹤時數執行中
-*/
-
 if( typeof(G)!=='undefined' )
 {
     clearTimeout(G.timer);
@@ -212,7 +206,7 @@ var G = {
             }
             
             div.innerHTML = 
-            `<a data-search_time="${sec}">${G.YtCurrentTime(sec)}</a>
+            `<a data-search_time="${G.YtCurrentTime(sec.split(":"))}">${(sec)}</a>
             <a>${message.querySelector("#author-name").innerText}</a>
             <a>${message.querySelector("#message").innerHTML}</a>`;
 
