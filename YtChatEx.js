@@ -202,7 +202,7 @@ var G = {
 
             if(sec.toLocaleLowerCase().indexOf("am")!==-1 || sec.toLocaleLowerCase().indexOf("pm")!==-1)
             {
-                sec = Math.floor(G.video.currentTime);
+                sec = G.YtCurrentTime(Math.floor(G.video.currentTime));
             }
             
             div.innerHTML = 
@@ -215,16 +215,9 @@ var G = {
             G.chat.appendChild(div);
         }
 
+        G.menu.querySelector("#yt_time").innerHTML = G.YtCurrentTime(G.video.currentTime);
+        
 
-        
-        
-        G.menu.innerHTML = `<a>實況時間：${G.YtCurrentTime(G.video.currentTime)}</a> / <a data-exit>關閉外掛</a><BR>
-        <a data-load>
-        讀檔
-        </a> / <a data-save="online">
-        存檔
-        </a>
-        `;
 
         /*
         <a data-control="auto_scroll">
@@ -254,6 +247,15 @@ var G = {
         G.menu = (!document.querySelector("#kfsshrimp_menu"))?document.createElement("div"):document.querySelector("#kfsshrimp_menu");
         G.menu.id = "kfsshrimp_menu";
         G.menu.setAttribute("draggable","true");
+
+        G.menu.innerHTML = `<a>實況時間：<span id="yt_time">00:00:00</span></a> / <a data-exit>關閉外掛</a><BR>
+        <a data-save="online">
+        存檔
+        </a> / <a data-load>
+        讀檔
+        </a> / <a data-restart>
+        重啟外掛</a>
+        `;
 
         document.body.prepend( G.menu );
     },
@@ -410,7 +412,7 @@ var G = {
     }
 };
 
-if( confirm("確定要執行外掛嗎?")===false ) G.control.run = true;
+if( prompt("警告！此執行方式有可能會寫入惡意程式，請確定該執行方式的程式來源為可信任的開發者！\n該程式開發者為噗浪帳號：kfsshrimp4\n聯絡方式可前往下述網址\n確定要安裝外掛嗎？\n(該外掛為一次性，重整或關閉網頁即失效)","https://www.plurk.com/kfsshrimp4")===null ) G.control.run = false;
 
 
 window.addEventListener("click",G.click = (e)=>{
@@ -495,7 +497,5 @@ if(G.control.run!==false)
 
 
 /*
-var js = document.createElement("script");
-js.src =  `https://kfsshrimp.github.io/plurk/YtChatEx.js?s=${new Date().getTime()}`;
-document.head.prepend(js);
+var js = document.createElement("script");js.src =  `https://kfsshrimp.github.io/plurk/YtChatEx.js?s=${new Date().getTime()}`;document.head.prepend(js);
 */
