@@ -449,6 +449,13 @@ window.addEventListener("click",G.click = (e)=>{
         G.Exit();
     }
 
+    if(e.target.dataset.restart==="")
+    {       
+        G.ReStart();
+    }
+
+    
+
 
     if(e.target.dataset.control)
     {
