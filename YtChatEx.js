@@ -13,7 +13,7 @@ if( typeof(G)!=='undefined' )
 }
 
 var G = {
-    "selector":`[author-type]`,//="moderator"
+    "selector":`[author-type="moderator"]`,//
     "sys_word":{
         "true":"開啟",
         "false":"關閉"
