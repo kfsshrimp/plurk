@@ -328,7 +328,7 @@ var G = {
         G.menu.setAttribute("draggable","true");
 
         G.menu.innerHTML = `<a>實況時間：<span id="yt_time">00:00:00</span></a> / <a data-exit>關閉外掛</a> / <a data-restart>
-        重啟外掛</a> / <a data-ytchatexinfo tip="功能說明">？</a><BR>${document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML}
+        重啟外掛</a> / <a data-ytchatexinfo title="功能說明">？</a><BR>${document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML}
 
         <!--<a data-save="online">
         存檔
