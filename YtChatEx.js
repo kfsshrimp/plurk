@@ -229,8 +229,16 @@ var G = {
             G.control.auto_scroll = true;
         });
 
+        G.click_timer = setInterval(()=>{
 
-        G.chatframe.contentDocument.querySelectorAll(".yt-simple-endpoint.yt-dropdown-menu")[1].click();
+            if(G.chatframe.contentDocument.querySelectorAll(".yt-simple-endpoint.yt-dropdown-menu")[1]!==null)
+            {
+                G.chatframe.contentDocument.querySelectorAll(".yt-simple-endpoint.yt-dropdown-menu")[1].click();
+                clearInterval(G.click_timer);
+            }
+
+        },1000);
+        
 
         setTimeout(()=>{G.chat_ref();},1000);
 
