@@ -84,12 +84,11 @@ var G = {
             height: 35px;
             left: 0px;
             top: 0px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.8);
             z-index: 9999;
             margin: 5px;
-            position: fixed;
             padding: 5px;
+            position: fixed;
             cursor: move;
         }
         #kfsshrimp_menu a{
@@ -98,6 +97,43 @@ var G = {
         }
         #kfsshrimp_menu a:hover{
             color:#f00;
+        }
+        #kfsshrimp_menu a[data-ytchatexinfo]{
+            border: 1px solid #000;
+            border-radius: 5px;
+            background: #999;
+            color: #fff;
+        }
+        #kfsshrimp_menu a[data-ytchatexinfo]:hover{
+            background: #fff;
+            color: #000;
+        }
+        #ytchatexinfo{
+            border-radius: 10px;
+            border: 1px solid #000;
+            overflow: auto;
+            width: auto;
+            height: auto;
+            left: 0px;
+            top: 0px;
+            background: rgba(255,255,255,1);
+            z-index: 9999;
+            margin: 5px;
+            padding: 5px;
+            position: fixed;
+        }
+        #ytchatexinfo div{
+            margin: 5px;
+            padding: 5px;
+        }
+        #ytchatexinfo input[type=button]{
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 2px;
+        }
+        #ytchatexinfo input[type=button]:hover{
+            background: #00f;
+            color: #fff;
         }
     `,
     "style_set":()=>{
@@ -122,6 +158,14 @@ var G = {
     "chat_set":()=>{
 
         G.chatframe = document.querySelector("iframe#chatframe");
+
+        if(G.chatframe===null)
+        {
+            G.timer = setTimeout(()=>{G.chat_set();},1000);
+            return;
+        }
+
+
         G.node = G.chatframe.contentDocument.querySelectorAll(G.selector);
 
         G.chat = (!document.querySelector("#top_chat"))?document.createElement("div"):document.querySelector("#top_chat");
@@ -190,16 +234,36 @@ var G = {
     },
     "chat_ref":()=>{
 
+        if( G.control.yt_id !== new URLSearchParams(location.search).get("v") )
+        {
+            G.menu.querySelector("#yt_time").innerHTML = "無影片";
+
+            G.video = document.querySelector("video");
+
+
+            if(G.video.src!=="" && new URLSearchParams(location.search).get("v")!==null)
+            {
+                console.log("restart");
+                G.control.yt_id = new URLSearchParams(location.search).get("v");
+                G.ReStart();
+                return;
+            }
+
+            G.timer = setTimeout(()=>{G.chat_ref();},1000);
+            return;
+        }
+
         //G.x = G.x||0;
         //console.log(G.x++);
-
-        G.save_list = G.save_list||[];
-
+        /*
         if(G.control.run===false)
         {
             G.timer = setTimeout(()=>{G.chat_ref();},1000);
             return;
         }
+        */
+
+        G.save_list = G.save_list||[];
 
         G.video = document.querySelector("video");
 
@@ -264,7 +328,8 @@ var G = {
         G.menu.setAttribute("draggable","true");
 
         G.menu.innerHTML = `<a>實況時間：<span id="yt_time">00:00:00</span></a> / <a data-exit>關閉外掛</a> / <a data-restart>
-        重啟外掛</a>
+        重啟外掛</a> / <a data-ytchatexinfo tip="功能說明">？</a><BR>${document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML}
+
         <!--<a data-save="online">
         存檔
         </a> / <a data-load>
@@ -454,9 +519,13 @@ var G = {
 
         G.Exit();
 
-        G.style_set();
-        G.chat_set();
-        G.menu_set();
+        G.Load( ()=>{
+
+            G.style_set();
+            G.chat_set();
+            G.menu_set();
+
+        } );
 
         window.addEventListener("click",G.click);
         window.addEventListener("dragend",G.dragend);
@@ -499,6 +568,8 @@ if( prompt("警告！此執行方式有可能會寫入惡意程式，請確定�
 
 window.addEventListener("click",G.click = (e)=>{
 
+    console.log(e.target.dataset);
+    
     if(e.target.dataset.search_time)
     {
         G.video.currentTime = G.YtCurrentTime( 
@@ -521,6 +592,33 @@ window.addEventListener("click",G.click = (e)=>{
         {
             G.Save();
         }
+    }
+
+    if(e.target.dataset.ytchatexinfo==="")
+    {
+        var div = document.createElement("div");
+        div.id = "ytchatexinfo";
+        div.setAttribute("draggable","true");
+        
+        div.innerHTML = `
+            <div>
+            程式開發者：<a href="https://www.plurk.com/kfsshrimp4" target="_blank">https://www.plurk.com/kfsshrimp4</a><BR>
+            程式碼公開位置：<a href="https://kfsshrimp.github.io/plurk/YtChatEx.js" target="_blank">https://kfsshrimp.github.io/plurk/YtChatEx.js</a><BR>
+            Youtube聊天視窗出現扳手訊息時會自動新增到外掛視窗<BR>
+            如Youtube聊天視窗停下來的話看不到新訊息便不會更新<BR>
+            請單獨重整Youtube聊天視窗<BR>
+            點選留言時間可以快速移動到該時間點<BR>
+            所有外掛視窗皆可移動位置<BR>
+            外掛聊天視窗可以縮放大小<BR>
+            </div><hr>
+            <input style="" type="button" value="關閉">
+        `;
+
+        div.querySelector("input").addEventListener("click",(e)=>{
+            e.target.parentElement.remove();
+        });
+
+        G.menu.appendChild(div);
     }
 
     if(e.target.dataset.load==="")
