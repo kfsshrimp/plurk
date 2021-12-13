@@ -563,12 +563,12 @@ var G = {
     }
 };
 
-if( prompt("警告！此執行方式有可能會寫入惡意程式，請確定該執行方式的程式來源為可信任的開發者！\n該程式開發者為噗浪帳號：kfsshrimp4\n聯絡方式可前往下述網址\n確定要安裝外掛嗎？\n(該外掛為一次性，重整或關閉網頁即失效)","https://www.plurk.com/kfsshrimp4")===null ) G.control.run = false;
+if( prompt("警告！此執行方式有可能會寫入惡意程式，請確定該執行方式的程式來源為可信任的開發者！\n該程式開發者為噗浪帳號：kfsshrimp4\n聯絡方式可前往下網址\n確定要安裝外掛嗎？\n(該外掛為一次性，重整或關閉網頁即失效)","https://www.plurk.com/kfsshrimp4")===null ) G.control.run = false;
 
 
 window.addEventListener("click",G.click = (e)=>{
 
-    console.log(e.target.dataset);
+    
     
     if(e.target.dataset.search_time)
     {
