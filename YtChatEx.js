@@ -5,9 +5,14 @@ if( typeof(G)!=='undefined' )
     window.removeEventListener("dragend",G.dragend);
     window.removeEventListener("mousedown",G.mousedown);
 }
+else
+{
+    var G = {};
+}
 
 var G = {
     "selector":`[author-type="moderator"]`,//
+    "DB":G.DB||false,
     "control":{
         "run":true,
         "auto_scroll":true,
@@ -23,7 +28,7 @@ var G = {
             border: 1px solid #000;
             background: rgba(125,125,125,0.4);
             z-index: 9999;
-            position: absolute;
+            position: fixed;
             resize: both;
             overflow: auto;
             overflow-x: hidden;
@@ -141,16 +146,23 @@ var G = {
 
         document.body.prepend(G.chat);
 
-        G.localStorage = JSON.parse(localStorage.YtChatEx||`{"${G.control.yt_id}":{"list":{}}}`);
+        //G.localStorage = JSON.parse(localStorage.YtChatEx||`{"${G.control.yt_id}":{"list":{}}}`);
 
-        G.localStorage[G.control.yt_id] = G.localStorage[G.control.yt_id]||{"list":{}};
+        //G.localStorage[G.control.yt_id] = G.localStorage[G.control.yt_id]||{"list":{}};
 
         var ary = [];
-        for(var id in G.localStorage[G.control.yt_id].list)
+        /*for(var id in G.localStorage[G.control.yt_id].list)
         {
             ary.push( G.localStorage[G.control.yt_id].list[id] );
         }
         ary.sort( (a,b)=>{ return a.sec-b.sec;} );
+        */
+        for(var id in G.msg_list[G.control.yt_id].list)
+        {
+            ary.push( G.msg_list[G.control.yt_id].list[id] );
+        }
+        ary.sort( (a,b)=>{ return a.sec-b.sec;} );
+
 
         for(var i=0;i<ary.length;i++)
         {
@@ -181,6 +193,8 @@ var G = {
         //G.x = G.x||0;
         //console.log(G.x++);
 
+        G.save_list = G.save_list||[];
+
         if(G.control.run===false)
         {
             G.timer = setTimeout(()=>{G.chat_ref();},1000);
@@ -197,7 +211,6 @@ var G = {
 
             if(G.chat.querySelector(`[id="${message.id}"]`)!==null) continue;
 
-            
             var div = document.createElement("div");
             div.id = message.id;
 
@@ -215,10 +228,12 @@ var G = {
             <a>${message.querySelector("#author-name").innerText}</a>
             <a>${message.querySelector("#message").innerHTML}</a>`;
 
-
-            
             G.chat.appendChild(div);
+
+            G.save_list.push( message.id );
         }
+
+        if(G.save_list.length>0) G.Save();
 
         G.menu.querySelector("#yt_time").innerHTML = G.YtCurrentTime(G.video.currentTime);
         
@@ -248,22 +263,22 @@ var G = {
         G.menu.id = "kfsshrimp_menu";
         G.menu.setAttribute("draggable","true");
 
-        G.menu.innerHTML = `<a>實況時間：<span id="yt_time">00:00:00</span></a> / <a data-exit>關閉外掛</a><BR>
-        <a data-save="online">
+        G.menu.innerHTML = `<a>實況時間：<span id="yt_time">00:00:00</span></a> / <a data-exit>關閉外掛</a> / <a data-restart>
+        重啟外掛</a>
+        <!--<a data-save="online">
         存檔
         </a> / <a data-load>
         讀檔
-        </a> / <a data-restart>
-        重啟外掛</a>
+        </a> / -->
         `;
 
         document.body.prepend( G.menu );
     },
-    "DB_set":()=>{
+    "DB_set":( func )=>{
         
         if(typeof(firebase)==='undefined')
         {
-            setTimeout(()=>{G.DB_set();},0);
+            setTimeout(()=>{G.DB_set( func );},0);
             return;
         }
 
@@ -273,10 +288,68 @@ var G = {
             G.DB.initializeApp({databaseURL:"https://kfs-plurk-default-rtdb.firebaseio.com/"});
             G.DB = G.DB.database();
         }
+
+
+        if(typeof(func)==='function') func();
+
     },
     "Save":()=>{
 
+        console.log("G.Save");
         G.DB_set();
+
+        var list = {};
+        for(var id of G.save_list)
+        {
+            var msg = G.chat.querySelector(`[id="${id}"]`);
+
+            list[ msg.id ] = {
+                "id":msg.id,
+                "sec":msg.querySelectorAll("a")[0].dataset.search_time,
+                "user":msg.querySelectorAll("a")[1].innerText,
+                "msg":msg.querySelectorAll("a")[2].innerHTML
+            }
+        }
+
+        G.save_list = [];
+
+
+        G.msg_list[ G.control.yt_id ] = {
+            "chanel":document.querySelector("yt-formatted-string.ytd-channel-name a").innerText,
+            "title":document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML,
+            "list":list
+        }
+
+        G.DB.ref(`YtChatEx/${G.control.yt_id}`).once("value",YtChatEx=>{
+                
+            YtChatEx = YtChatEx.val()||{"list":{}};
+
+            for(var k in G.msg_list[ G.control.yt_id ])
+            {
+                if(k==="list")
+                {
+                    for(var id in G.msg_list[ G.control.yt_id ].list)
+                    {
+                        YtChatEx.list[ id ] = 
+                        G.msg_list[ G.control.yt_id ].list[ id ];
+                    }
+                }
+                else
+                {
+                    YtChatEx[k] = 
+                    G.msg_list[ G.control.yt_id ][k];
+                }
+            }
+
+            G.DB.ref(`YtChatEx/${G.control.yt_id}`).update(YtChatEx);
+
+            console.log("SAVE");
+            //alert("存檔完成");
+        });
+
+
+
+        return;
 
         G.localStorage = JSON.parse(localStorage.YtChatEx||`{"${G.control.yt_id}":{"list":{}}}`);
 
@@ -284,7 +357,6 @@ var G = {
         for(var i=0;i<G.chat.children.length;i++)
         {
             var msg = G.chat.children[i];
-
 
             list[ msg.id ] = {
                 "id":msg.id,
@@ -294,7 +366,6 @@ var G = {
             }
         }
         
-
         G.localStorage[ G.control.yt_id ] = {
             "chanel":document.querySelector("yt-formatted-string.ytd-channel-name a").innerText,
             "title":document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML,
@@ -326,14 +397,16 @@ var G = {
                 }
             }
 
-
             G.DB.ref(`YtChatEx/${G.control.yt_id}`).update(YtChatEx[ G.control.yt_id ]);
 
-            alert("存檔完成");
+            console.log("SAVE");
+            //alert("存檔完成");
         });
 
     },
-    "Load":()=>{
+    "Load":( func )=>{
+
+        console.log("G.Load");
 
         G.DB_set();
 
@@ -341,7 +414,10 @@ var G = {
                 
             YtChatEx = YtChatEx.val()||{"list":{}};
 
-            G.localStorage = JSON.parse(localStorage.YtChatEx||`{"${G.control.yt_id}":{"list":{}}}`);
+            //G.localStorage = JSON.parse(localStorage.YtChatEx||`{"${G.control.yt_id}":{"list":{}}}`);
+
+            G.msg_list = {};
+            G.msg_list[ G.control.yt_id ] = {"list":{}};
 
 
             for(var k in YtChatEx)
@@ -350,24 +426,32 @@ var G = {
                 {
                     for(var id in YtChatEx.list)
                     {
-                        G.localStorage[ G.control.yt_id ].list[id] = YtChatEx.list[id];
+                        //G.localStorage[ G.control.yt_id ].list[id] = YtChatEx.list[id];
+
+                        G.msg_list[ G.control.yt_id ].list[id] = YtChatEx.list[id];
                     }
                 }
                 else
                 {
-                    G.localStorage[ G.control.yt_id ][k] = 
+                    //G.localStorage[ G.control.yt_id ][k] = 
+                    YtChatEx[k];
+
+                    G.msg_list[ G.control.yt_id ][k] = 
                     YtChatEx[k];
                 }
             }
 
-            localStorage.YtChatEx = JSON.stringify(G.localStorage);
+            //localStorage.YtChatEx = JSON.stringify(G.localStorage);
 
-            alert("讀檔完成");
+            console.log("LOAD");
+            //alert("讀檔完成");
+            //G.ReStart();
 
-            G.ReStart();
+            if(typeof(func)==='function') func();
         });
     },
     "ReStart":()=>{
+
         G.Exit();
 
         G.style_set();
@@ -454,9 +538,6 @@ window.addEventListener("click",G.click = (e)=>{
         G.ReStart();
     }
 
-    
-
-
     if(e.target.dataset.control)
     {
         var control = G.control[ e.target.dataset.control ];
@@ -475,7 +556,7 @@ window.addEventListener("dragend",G.dragend = (e)=>{
     if(e.target.getAttribute("draggable")==="true")
     {
         e.target.style.left = e.clientX - G.mousedown.offsetX + "px";
-        e.target.style.top = e.clientY - G.mousedown.offsetY + window.scrollY + "px";
+        e.target.style.top = e.clientY - G.mousedown.offsetY + "px";// + window.scrollY 
     }
 });
 
@@ -491,11 +572,20 @@ if(G.control.run!==false)
     firebasejs1.src="https://www.gstatic.com/firebasejs/5.5.6/firebase.js";
     document.head.appendChild(firebasejs1);
 
+    G.DB_set( ()=>{
 
-    G.style_set();
-    G.chat_set();
-    G.menu_set();
-    //G.DB_set();
+        G.Load( ()=>{
+
+            G.style_set();
+            G.chat_set();
+            G.menu_set();
+
+        } );
+
+    } );
+    
+
+    
 }
 
 
