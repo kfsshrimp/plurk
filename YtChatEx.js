@@ -563,7 +563,7 @@ var G = {
     }
 };
 
-if( prompt("警告！此執行方式有可能會寫入惡意程式，請確定該執行方式的程式來源為可信任的開發者！\n該程式開發者為噗浪帳號：kfsshrimp4\n聯絡方式可前往下網址\n確定要安裝外掛嗎？\n(該外掛為一次性，重整或關閉網頁即失效)","https://www.plurk.com/kfsshrimp4")===null ) G.control.run = false;
+if( prompt("警告！此執行方式有可能會寫入惡意程式，請確定該執行方式的程式來源為可信任的開發者！\n該程式開發者為噗浪帳號：kfsshrimp4\n聯絡方式可前往下網址\n確定要安裝外掛嗎？\n(該外掛為一次性，重整或關閉網頁即失效)","https://www.plurk.com/p/oo6cxp")===null ) G.control.run = false;
 
 
 window.addEventListener("click",G.click = (e)=>{
@@ -604,6 +604,7 @@ window.addEventListener("click",G.click = (e)=>{
             <div>
             程式開發者：<a href="https://www.plurk.com/kfsshrimp4" target="_blank">https://www.plurk.com/kfsshrimp4</a><BR>
             程式碼公開位置：<a href="https://kfsshrimp.github.io/plurk/YtChatEx.js" target="_blank">https://kfsshrimp.github.io/plurk/YtChatEx.js</a><BR>
+            問題回報可在：<a href="https://www.plurk.com/p/oo6cxp" target="_blank">https://www.plurk.com/p/oo6cxp</a><BR>
             Youtube聊天視窗出現扳手訊息時會自動新增到外掛視窗<BR>
             如Youtube聊天視窗停下來的話看不到新訊息便不會更新<BR>
             請單獨重整Youtube聊天視窗<BR>
