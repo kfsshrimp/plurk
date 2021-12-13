@@ -229,11 +229,18 @@ var G = {
             G.control.auto_scroll = true;
         });
 
+
+        G.chatframe.contentDocument.querySelectorAll(".yt-simple-endpoint.yt-dropdown-menu")[1].click();
+
         setTimeout(()=>{G.chat_ref();},1000);
 
     },
     "chat_ref":()=>{
 
+
+        G.x = G.x||0;
+        console.log(G.x++);
+        
         if( G.control.yt_id !== new URLSearchParams(location.search).get("v") )
         {
             G.menu.querySelector("#yt_time").innerHTML = "無影片";
@@ -253,8 +260,7 @@ var G = {
             return;
         }
 
-        //G.x = G.x||0;
-        //console.log(G.x++);
+        
         /*
         if(G.control.run===false)
         {
@@ -414,59 +420,7 @@ var G = {
 
 
 
-        return;
-
-        G.localStorage = JSON.parse(localStorage.YtChatEx||`{"${G.control.yt_id}":{"list":{}}}`);
-
-        var list = {};
-        for(var i=0;i<G.chat.children.length;i++)
-        {
-            var msg = G.chat.children[i];
-
-            list[ msg.id ] = {
-                "id":msg.id,
-                "sec":msg.querySelectorAll("a")[0].dataset.search_time,
-                "user":msg.querySelectorAll("a")[1].innerText,
-                "msg":msg.querySelectorAll("a")[2].innerHTML
-            }
-        }
-        
-        G.localStorage[ G.control.yt_id ] = {
-            "chanel":document.querySelector("yt-formatted-string.ytd-channel-name a").innerText,
-            "title":document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML,
-            "list":list
-        };
-
-        localStorage.YtChatEx = JSON.stringify(G.localStorage);
-
-        G.DB.ref("YtChatEx").once("value",YtChatEx=>{
-                
-            YtChatEx = YtChatEx.val()||{};
-
-            YtChatEx[ G.control.yt_id ] = YtChatEx[ G.control.yt_id ]||{"list":{}};
-
-            for(var k in G.localStorage[ G.control.yt_id ])
-            {
-                if(k==="list")
-                {
-                    for(var id in G.localStorage[ G.control.yt_id ].list)
-                    {
-                        YtChatEx[ G.control.yt_id ].list[ id ] = 
-                        G.localStorage[ G.control.yt_id ].list[ id ];
-                    }
-                }
-                else
-                {
-                    YtChatEx[ G.control.yt_id ][k] = 
-                    G.localStorage[ G.control.yt_id ][k];
-                }
-            }
-
-            G.DB.ref(`YtChatEx/${G.control.yt_id}`).update(YtChatEx[ G.control.yt_id ]);
-
-            console.log("SAVE");
-            //alert("存檔完成");
-        });
+      
 
     },
     "Load":( func )=>{
