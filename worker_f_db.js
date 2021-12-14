@@ -9,8 +9,7 @@ var System = {
 
 onmessage = function(msg){
 
-    var mode = msg.data.mode;
-    console.log(`mode:${mode}`);
+    console.log(msg);
 
     
 
