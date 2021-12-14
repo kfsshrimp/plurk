@@ -11,6 +11,7 @@ else
 }
 
 var G = {
+    "worker":new Worker("worker_f_db.js"),
     "selector":`[author-type="moderator"]`,//
     "DB":G.DB||false,
     "control":{
