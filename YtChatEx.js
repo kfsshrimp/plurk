@@ -11,7 +11,6 @@ else
 }
 
 var G = {
-    "worker":new Worker("worker_f_db.js"),
     "selector":`[author-type="moderator"]`,//
     "DB":G.DB||false,
     "control":{
@@ -248,7 +247,7 @@ var G = {
 
 
         G.x = G.x||0;
-        console.log(G.x++);
+        //console.log(G.x++);
         
         if( G.control.yt_id !== new URLSearchParams(location.search).get("v") )
         {
