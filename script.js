@@ -7,33 +7,34 @@ var ALL = {
                     "ときのそら":["空媽"],
                     "AZKi":["AZKI"],
                     "ロボ子さん":["RBC"],
-                    "さくらみこ":["35","櫻"]
+                    "さくらみこ":["35","櫻","miko"],
+                    "星街すいせい":["星街","すいせい","星姐"]
                 },
                 "GAMERS":{
-                    "大神ミオ":["狼"],
-                    "猫又おかゆ":["小粥"],
-                    "戌神ころね":["狗"],
-                    "白上フブキ":["FBK","白上吹雪"]
+                    "大神ミオ":["狼","大神","ミオ"],
+                    "猫又おかゆ":["小粥","猫又","おかゆ"],
+                    "戌神ころね":["狗","戌神","ころね"],
+                    "白上フブキ":["FBK","白上吹雪","白上","フブキ"]
                 },
                 "1期生":{
-                    "白上フブキ":["FBK","白上吹雪"],
-                    "夜空メル":["梅露"],
-                    "夏色まつり":["夏哥"],
-                    "赤井はあと":["哈醬馬","哈洽馬","赤井心"],
-                    "アキ・ローゼンタール":["AKI"]
+                    "白上フブキ":["FBK","白上吹雪","白上","フブキ"],
+                    "夜空メル":["梅露","夜空","メル"],
+                    "夏色まつり":["夏哥","夏色","まつり"],
+                    "赤井はあと":["哈醬馬","哈洽馬","赤井心","赤井","はあと"],
+                    "アキ・ローゼンタール":["AKI","アキ"]
                 },
                 "2期生":{
-                    "湊あくあ":["夸"],
-                    "癒月ちょこ":["巧可","老師"],
-                    "百鬼あやめ":["百鬼","大小姐"],
-                    "紫咲シオン":["詩音"],
-                    "大空スバル":["486","昂","大空"]
+                    "湊あくあ":["夸","湊","あくあ"],
+                    "癒月ちょこ":["巧可","老師","癒月","ちょこ"],
+                    "百鬼あやめ":["百鬼","あやめ","大小姐","余"],
+                    "紫咲シオン":["紫咲","シオン","詩音"],
+                    "大空スバル":["486","昂","大空","スバル"]
                 },
                 "3期生":{
-                    "兎田ぺこら":["兔","佩克拉"],
+                    "兎田ぺこら":["兔","佩克拉","兎田","ぺこら"],
                     "不知火フレア":["不知火","フレア"],
-                    "白銀ノエル":["團長"],
-                    "宝鐘マリン":["船長"],
+                    "白銀ノエル":["團長","白銀","ノエル"],
+                    "宝鐘マリン":["船長","宝鐘","マリン"],
                     "潤羽るしあ":["露西亞","潤羽","るしあ"]
                 },
                 "4期生":{
@@ -50,9 +51,9 @@ var ALL = {
                     "尾丸ポルカ":["座長","尾丸","ポルカ"]
                 },
                 "6期生":{
-                    "ラプラス・ダークネス":["總帥","山田","ラプラス"],
-                    "鷹嶺ルイ":["rui","鷹","鷹嶺","ルイ"],
-                    "博衣こより":["博衣","こより"],
+                    "ラプラス・ダークネス":["總帥","山田","ラプラス","LAP","LA+",""],
+                    "鷹嶺ルイ":["rui","lui","鷹","鷹嶺","ルイ"],
+                    "博衣こより":["博衣","こより","博士"],
                     "沙花叉クロヱ":["虎鯨","沙花叉","クロヱ"],
                     "風真いろは":["風真"]
                 },
@@ -69,8 +70,8 @@ var ALL = {
                     "九十九佐命":["sana","Tsukumo Sana"],
                     "セレス・ファウナ":["fauna","Ceres Fauna"],
                     "オーロ・クロニー":["kronii","Ouro Kronii"],
-                    "七詩ムメイ":["七詩","mumei","Nanashi Mumei"],
-                    "ハコス・ベールズ":["鼠","Hakos Baelz"]
+                    "七詩ムメイ":["mumei","Nanashi Mumei"],
+                    "ハコス・ベールズ":["鼠","Hakos Baelz","Bael"]
                 },
                 "IRyS":[]
             },
@@ -100,7 +101,14 @@ var ALL = {
         "plurk":{}
     },
     "localStorage":{},
-    "sessionStorage":{}
+    "sessionStorage":{},
+    "DB_set":()=>{
+
+        ALL.DB = firebase;
+        ALL.DB.initializeApp({databaseURL:"https://kfs-plurk-default-rtdb.firebaseio.com/"});
+        ALL.DB = ALL.DB.database();
+
+    }
 }
 
 ALL.localStorage = JSON.parse(localStorage.kfs_plurk||`{}`);
@@ -351,6 +359,15 @@ window.onload = function(){
                 document.body.scrollTo(0,0);
             }
 
+
+            if(e.target.dataset.setting_act==="chat_log")
+            {
+                ALL.DB.ref("/YtChatEx").once("value",r=>{
+                    r = r.val();
+                    console.log(r);
+                });
+            }
+
         }
 
 
@@ -416,7 +433,7 @@ window.onload = function(){
 
     window.addEventListener("dragend",function(e){
 
-        if(e.target.getAttribute("draggable")=="true")
+        if(e.target.getAttribute("draggable")==="true")
         {
             e.target.style.left = e.clientX - ALL.mousedown.offsetX;
             e.target.style.top = e.clientY - ALL.mousedown.offsetY + window.scrollY;
@@ -460,6 +477,8 @@ window.onload = function(){
         "config_id":ALL.config.plurk_id
     } );
 
+
+    ALL.DB_set();
 
 }
 
@@ -510,6 +529,7 @@ function MenuCr(path,obj)
             <option value="youtu">youtube</option>
             <option value="nhentai">nhentai</option>
             <option value="asmr">ASMR</option>
+            <option value="mmd">MMD</option>
             </select>
             <input type="text">
             <input type="button" value="搜尋" data-detail_search="true">
@@ -521,6 +541,9 @@ function MenuCr(path,obj)
         <div id="sort_search">
             排序<br>
             <input type="button" value="日期 ↑" data-sort="posted">
+        </div>
+        <div id="chat_log">
+            <input type="button" value="聊天互動記錄" data-setting_act="chat_log">
         </div>
         `;
 
