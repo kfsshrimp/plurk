@@ -473,7 +473,7 @@ var G = {
             {
                 YtChatEx.chanel = document.querySelector("yt-formatted-string.ytd-channel-name a").innerText;
                 YtChatEx.title = document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML;
-                YtChatEx.date = document.querySelector("#info-strings yt-formatted-string").innerText;
+                YtChatEx.date = G.YtPostDate(document.querySelector("#info-strings yt-formatted-string").innerText);
 
                 console.log('test');
                 console.log(YtChatEx);
@@ -535,6 +535,15 @@ var G = {
         }
         else
             return `${ Math.floor(sec/3600).toString().padStart(2,"0") }:${ Math.floor(sec%3600/60).toString().padStart(2,"0") }:${ Math.floor(sec%60).toString().padStart(2,"0") }`;
+    },
+    "YtPostDate":(str)=>{
+
+        if(str==="") return ``;
+
+        str = str.split("：")[1];
+
+        return `${str.split("年")[0]}/${str.split("年")[1].split("月")[0]}/${str.split("月")[1].split("日")[0]}`;
+
     }
 };
 
