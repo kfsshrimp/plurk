@@ -461,11 +461,24 @@ var G = {
                 else
                 {
                     //G.localStorage[ G.control.yt_id ][k] = 
-                    YtChatEx[k];
+                    //YtChatEx[k];
 
                     G.msg_list[ G.control.yt_id ][k] = 
                     YtChatEx[k];
                 }
+            }
+
+
+            if(YtChatEx.chanel!==undefined)
+            {
+                YtChatEx.chanel = document.querySelector("yt-formatted-string.ytd-channel-name a").innerText;
+                YtChatEx.title = document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML;
+                YtChatEx.date = document.querySelector("#info-strings yt-formatted-string").innerText;
+
+                console.log('test');
+                console.log(YtChatEx);
+
+                G.DB.ref(`YtChatEx/${G.control.yt_id}`).update(YtChatEx);
             }
 
             //localStorage.YtChatEx = JSON.stringify(G.localStorage);
