@@ -396,6 +396,7 @@ var G = {
         G.msg_list[ G.control.yt_id ] = {
             "chanel":document.querySelector("yt-formatted-string.ytd-channel-name a").innerText,
             "title":document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML,
+            "date":YtChatEx.date = document.querySelector("#info-strings yt-formatted-string").innerText,
             "list":list
         }
 
@@ -473,7 +474,7 @@ var G = {
             {
                 YtChatEx.chanel = document.querySelector("yt-formatted-string.ytd-channel-name a").innerText;
                 YtChatEx.title = document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML;
-                YtChatEx.date = G.YtPostDate(document.querySelector("#info-strings yt-formatted-string").innerText);
+                YtChatEx.date = document.querySelector("#info-strings yt-formatted-string").innerText;
 
                 console.log('test');
                 console.log(YtChatEx);
