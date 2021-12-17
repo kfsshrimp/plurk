@@ -107,7 +107,37 @@ var ALL = {
         ALL.DB = firebase;
         ALL.DB.initializeApp({databaseURL:"https://kfs-plurk-default-rtdb.firebaseio.com/"});
         ALL.DB = ALL.DB.database();
+    },
+    "YtPostDate":(str)=>{
 
+        str = str||'';
+
+        if(str==="" || 
+        str.toString().indexOf("年")===-1 ||
+        str.toString().indexOf("月")===-1 ||
+        str.toString().indexOf("日")===-1 ) return new Date().getTime();
+
+        str = str.split("：")[1];
+
+        return `${str.split("年")[0]}/${str.split("年")[1].split("月")[0]}/${str.split("月")[1].split("日")[0]}`;
+    },
+    "YtCurrentTime":(sec)=>{
+
+        if(Array.isArray(sec))
+        {
+            if(
+            sec.some( w=>{ 
+                return (w.toLocaleLowerCase().indexOf("am")!==-1 || 
+                w.toLocaleLowerCase().indexOf("pm")!==-1) ;
+            }) )
+            {
+                return "";
+            }
+
+            return sec.reverse().map((sec,i)=>{return sec*Math.pow(60,i);}).reduce((a,b)=>a+b);
+        }
+        else
+            return `${ Math.floor(sec/3600).toString().padStart(2,"0") }:${ Math.floor(sec%3600/60).toString().padStart(2,"0") }:${ Math.floor(sec%60).toString().padStart(2,"0") }`;
     }
 }
 
@@ -364,7 +394,52 @@ window.onload = function(){
             {
                 ALL.DB.ref("/YtChatEx").once("value",r=>{
                     r = r.val();
-                    console.log(r);
+
+                    ALL.chat_log = r;
+
+                    var ary = [];
+                    for(var id in r)
+                    {
+                        r[id].id = id;
+                        ary.push(r[id]);
+                    }
+
+                    
+                    
+                    ary.sort((a,b)=>{
+
+                        return new Date( ALL.YtPostDate( a.date ) ).getTime() - new Date( ALL.YtPostDate( b.date ) ).getTime();
+                        
+                    });
+
+                    
+                    
+                    ALL.obj.main.innerHTML = "";
+                    var div = document.createElement("div");
+                    for(var k in ary)
+                    {
+                        var list = document.createElement("div");
+                        list.id = ary[k].id;
+                        list.className = "yt";
+
+                        list.innerHTML = 
+                        `
+                        ${ary[k].chanel}${(typeof(ALL.YtPostDate(ary[k].date))==="number")?'':' / ' +ALL.YtPostDate(ary[k].date)}
+                        <a target="_blank" href="https://www.youtube.com/watch?v=${ary[k].id}">
+                        <yt_title>${ary[k].title}</yt_title>
+                        </a>
+                        <img data-pop="chat_log" src="https://i.ytimg.com/vi/${ary[k].id}/hqdefault.jpg">
+                        <div id="top_chat" iframe draggable="true" hide>
+                        <input type="button" value="關閉" close>
+                        </div>
+                        `;
+
+                        div.appendChild(list);
+                    }
+
+                    ALL.obj.main.appendChild(div);
+
+
                 });
             }
 
@@ -407,7 +482,42 @@ window.onload = function(){
             },1000);
         }
 
+
+        if(e.target.dataset.pop)
+        {
+            if(e.target.dataset.pop==="chat_log")
+            {
+                var chat = e.target.parentElement.querySelector("#top_chat");
+                
+                chat.innerHTML = `<input type="button" value="關閉" close>`;
+
+                chat.removeAttribute("hide");
+
+                chat.style.left = `${e.target.parentElement.offsetLeft}px`;
+                chat.style.top = `${e.target.parentElement.offsetTop}px`;
+
+
+                for(var id in ALL.chat_log[e.target.parentElement.id].list)
+                {
+                    var f_data = ALL.chat_log[e.target.parentElement.id].list[id];
+
+                    var div = document.createElement("div");
+                    div.id = f_data.id;
         
+                    div.innerHTML = `<a data-v="${e.target.parentElement.id}" data-search_time="${f_data.sec}">${ALL.YtCurrentTime(f_data.sec)}</a> <a>${f_data.user}</a> <a>${f_data.msg}</a></div>`;
+
+                    chat.appendChild(div);
+                }
+
+                
+            }
+        }
+
+        if(e.target.dataset.search_time)
+        {
+            open(`https://www.youtube.com/watch?v=${e.target.dataset.v}&t=${e.target.dataset.search_time}s`,"_blank");
+        }
+
 
         if(e.target.dataset.menu)
         {
@@ -425,6 +535,7 @@ window.onload = function(){
 
         if(e.target.getAttribute("close")!==null)
         {
+            if(e.target.parentElement.querySelector("iframe")!==null)
             e.target.parentElement.querySelector("iframe").setAttribute("src","");
             e.target.parentElement.setAttribute("hide","");
         }
@@ -719,7 +830,7 @@ function Search(keyword,sort)
             img = img.join("/");
 
             list.innerHTML = `
-            <a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>
+            <!--<a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>-->
             <tag>${tag}</tag>
             <a target="_blank" href="${a[0].href}">
             <yt_title>${title}</yt_title>
@@ -754,7 +865,7 @@ function Search(keyword,sort)
             }
 
             list.innerHTML = `
-            <a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>
+            <!--<a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>-->
             <tag>${tag}</tag>
             <a target="_blank" href="${url[0].href}">
             <img src="${img[0].querySelector("img").src}">

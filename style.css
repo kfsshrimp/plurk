@@ -112,7 +112,7 @@ div#main{
 div#main>div>div.yt,
 div#main>div>div.nh{
     width: 490px;
-    height: 442px;
+    height: 462px;
     overflow: hidden;
     border-radius: 4px;
     border: 2px solid #000;
@@ -128,7 +128,7 @@ div#main>div>div.nh[hide]{
 
 yt_title{
     display: block;
-    height: 20px;
+    height: 40px;
     width: 480px;
     overflow: hidden;
 }
@@ -167,6 +167,59 @@ div#detail_search select{
 }
 
 
+#top_chat{
+    border-radius: 10px;
+    border: 1px solid #000;
+    background: rgba(125,125,125,0.4);
+    z-index: 9999;
+    position: absolute;
+    resize: both;
+    overflow: auto;
+    overflow-x: hidden;
+    cursor: move;
+    padding: 10px;
+}
+#top_chat>div{
+    background:#fff;
+    cursor: pointer;
+    border: 2px solid #000;
+    margin: 2px;
+    padding: 8px;
+    border-radius: 10px;
+}
+#top_chat>div a:nth-child(1){
+    display: inline;
+    margin: 0 8px 0 0;
+    color: hsla(0, 0%, 6.7%, 0.4);
+    font-size: 11px;
+}
+#top_chat>div a:nth-child(1):hover{
+    color:#f00;
+    border: 1px solid #000;
+    background: #fff;
+    border-radius: 4px;
+}
+#top_chat>div a:nth-child(1):active{
+    color:#fff;
+    background: #000;
+}
+#top_chat>div a:nth-child(2){
+    color: hsl(225, 84%, 66%);
+    display: inline-flex;
+}
+#top_chat>div a:nth-child(2) div{
+    color: #5e84f1;
+}
+#top_chat>div a:nth-child(3){
+    color: hsl(0, 0%, 6.7%);
+}
+#top_chat>div .emoji
+{
+    width: 24px;
+    height: 24px;
+    margin: -1px 2px 1px;
+    vertical-align: middle;
+}
 
 
 ul{
