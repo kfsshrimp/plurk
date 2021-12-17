@@ -429,7 +429,7 @@ window.onload = function(){
                         <yt_title>${ary[k].title}</yt_title>
                         </a>
                         <img data-pop="chat_log" src="https://i.ytimg.com/vi/${ary[k].id}/hqdefault.jpg">
-                        <div id="top_chat" iframe draggable="true" hide>
+                        <div id="top_chat" draggable="true" hide>
                         <input type="button" value="關閉" close>
                         </div>
                         `;
@@ -497,9 +497,22 @@ window.onload = function(){
                 chat.style.top = `${e.target.parentElement.offsetTop}px`;
 
 
-                for(var id in ALL.chat_log[e.target.parentElement.id].list)
+                var list = ALL.chat_log[e.target.parentElement.id].list;
+                var ary = [];
+                for(var k in list)
                 {
-                    var f_data = ALL.chat_log[e.target.parentElement.id].list[id];
+                    list[k].id = k;
+                    ary.push(list[k]);
+                }
+
+                ary.sort( (a,b)=>{
+                    return a.sec-b.sec;
+                });
+
+
+                for(var k in ary)
+                {
+                    var f_data = ary[k];
 
                     var div = document.createElement("div");
                     div.id = f_data.id;

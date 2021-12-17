@@ -176,6 +176,8 @@ div#detail_search select{
     resize: both;
     overflow: auto;
     overflow-x: hidden;
+    width: 490px;
+    height: 462px;
     cursor: move;
     padding: 10px;
 }
@@ -219,6 +221,10 @@ div#detail_search select{
     height: 24px;
     margin: -1px 2px 1px;
     vertical-align: middle;
+}
+
+#top_chat input{
+    width: 100%;
 }
 
 
