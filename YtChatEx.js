@@ -476,8 +476,6 @@ var G = {
                 YtChatEx.title = document.querySelector("h1.ytd-video-primary-info-renderer").children[0].innerHTML;
                 YtChatEx.date = document.querySelector("#info-strings yt-formatted-string").innerText;
 
-                console.log('test');
-                console.log(YtChatEx);
 
                 G.DB.ref(`YtChatEx/${G.control.yt_id}`).update(YtChatEx);
             }
@@ -635,8 +633,10 @@ window.addEventListener("click",G.click = (e)=>{
 
 
 
-window.addEventListener("dragend",G.dragend = (e)=>{
 
+
+window.addEventListener("dragend",G.dragend = (e)=>{
+    
     if(e.target.getAttribute("draggable")==="true")
     {
         e.target.style.left = e.clientX - G.mousedown.offsetX + "px";
@@ -645,9 +645,14 @@ window.addEventListener("dragend",G.dragend = (e)=>{
 });
 
 
+
 window.addEventListener("mousedown",G.mousedown = (e)=>{
+    
     G.mousedown = e;
 });
+
+
+
 
 
 if(G.control.run!==false)
