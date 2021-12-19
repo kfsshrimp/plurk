@@ -408,7 +408,7 @@ window.onload = function(){
                     
                     ary.sort((a,b)=>{
 
-                        return new Date( ALL.YtPostDate( a.date ) ).getTime() - new Date( ALL.YtPostDate( b.date ) ).getTime();
+                        return new Date( ALL.YtPostDate( b.date ) ).getTime() - new Date( ALL.YtPostDate( a.date ) ).getTime();
                         
                     });
 
@@ -426,7 +426,7 @@ window.onload = function(){
                         `
                         ${ary[k].chanel}${(typeof(ALL.YtPostDate(ary[k].date))==="number")?'':' / ' +ALL.YtPostDate(ary[k].date)}
                         <a target="_blank" href="https://www.youtube.com/watch?v=${ary[k].id}">
-                        <yt_title>${ary[k].title}</yt_title>
+                        <yt_title>${DelHtmlTag(ary[k].title)}</yt_title>
                         </a>
                         <img data-pop="chat_log" src="https://i.ytimg.com/vi/${ary[k].id}/hqdefault.jpg">
                         <div id="top_chat" draggable="true" hide>
@@ -751,6 +751,8 @@ function Search(keyword,sort)
                     content.indexOf(type)!==-1 
                     &&
                     tag_not.indexOf(str)===-1
+                    &&
+                    tag_not.indexOf(type)===-1
             )
             {
                 search_result[ f_data.id ] = f_data;
