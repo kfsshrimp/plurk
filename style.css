@@ -161,7 +161,7 @@ div#detail_search input[type=text]{
 }
 
 div#detail_search select{
-    width: 100%;
+    width: 150px;
     border-radius: 4px;
     border: 2px solid #000;
 }
