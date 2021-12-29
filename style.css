@@ -58,7 +58,39 @@ div#block{
     cursor:wait;
     z-index: 99;
 }
+div#block div{
+    position: absolute;
+    height: 50px;
+    width: 50px;
+    top: calc(50% - 50px);
+    left: calc(50% - 50px);
+    border-radius: 50%;
+    background: transparent;
+}
 
+div#block div:nth-child(1){
+    
+    border-top:3px solid #aaa;
+    animation: load 1s infinite linear;
+}
+
+@keyframes load {
+    to {
+        transform: rotateZ(360deg);
+    }
+}
+
+
+
+div#block div:nth-child(2){
+    color: #fff;
+    font-size: 20px;
+    top: calc(50% + 20px);
+    left: calc(50% - 70px);
+    
+}
+
+/*
 div#block div{
     margin-top: 1%;
     width: 100%;
@@ -68,6 +100,7 @@ div#block div{
     font-size: 20px;
     color: #000;
 }
+*/
 
 div#top_bar{
     width: 30px;
@@ -89,19 +122,31 @@ div#top_bar:hover{
     color: #fff;
 }
 
-
 div#menu{
     position: fixed;
     width: 5%;
+    
 }
 
 div#menu>div{
     margin: 4px;
 }
 
-div#menu div{
-    padding-left:10%;
+div#menu>div:nth-child(1){
+    left:200px;
+    
+    display: flex;
+    cursor: move;
+    position: absolute;
+    border: 2px solid #00f;
+    background: #00f6;
 }
+
+
+div#menu>div:nth-child(1)>div div{
+    margin-left: 10px;
+}
+
 
 div#main{
     padding: 10px;

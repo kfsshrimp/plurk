@@ -156,6 +156,9 @@ ALL.worker.onmessage = (msg)=>{
 
     if(mode==="config")
     {
+        LoadingBlock();
+
+
         ALL.config.plurk = msg.data.r;
 
         ALL.config.plurk[ ALL.config.plurk_id ].plurk.value = JSON.parse(
@@ -230,6 +233,8 @@ ALL.worker.onmessage = (msg)=>{
 
     if(mode==="plurk_id_count")
     {
+        /*
+
         var total_sec = msg.data.r.length * 1000;
         var progress = 0;
         var p = ALL.obj.block.querySelector("div");
@@ -244,6 +249,7 @@ ALL.worker.onmessage = (msg)=>{
                 setTimeout(()=>{LoadingBlock();},500);
             }
         },(total_sec/100));
+        */
     }
 
 
@@ -271,9 +277,15 @@ window.onload = function(){
         ALL.obj.block.id = "block";
         ALL.obj.block.style.display = "block";
 
+        ALL.obj.block.innerHTML = `
+            <div></div>
+            <div>LOADING...</div>
+        `;
+        /*
         var progress = document.createElement("div");
         progress.style.background = "linear-gradient(to right,#0f0 0%,#fff 0%";
         ALL.obj.block.appendChild(progress);
+        */
 
         document.body.appendChild(ALL.obj.block);
     }
@@ -310,7 +322,7 @@ window.onload = function(){
 
         if(e.target.dataset.search)
         {
-            ALL.obj.menu.querySelector("#detail_search input[type=text]").value = e.target.dataset.search;
+            ALL.obj.menu.querySelector("#detail_search input[type=text]").dataset._value = e.target.dataset.search;
             document.querySelector("#detail_search select").value = "youtu";
             var sort_obj = document.querySelector("[data-sort]");
             Search( e.target.dataset.search ,  sort_obj.dataset.sort );
@@ -319,7 +331,8 @@ window.onload = function(){
         if(e.target.dataset.detail_search)
         {
             var sort_obj = document.querySelector("[data-sort]");
-            Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , sort_obj.dataset.sort );
+            var keyword = ALL.obj.menu.querySelector("#detail_search input[type=text]");
+            Search( `${keyword.value} ${keyword.dataset._value}`  , sort_obj.dataset.sort );
         }
 
         if(e.target.dataset.tag_search)
@@ -587,13 +600,18 @@ window.onload = function(){
 
     });
 
+    
     MenuCr("MENU",ALL.obj.menu);
 
+    ALL.obj.menu.querySelector("div").setAttribute("draggable","true");
 
 
+
+    /*
     var progress = 0;
     var p = ALL.obj.block.querySelector("div");
     p.innerText = `0%`;
+    */
 
 
     ALL.worker.postMessage( {
@@ -625,11 +643,14 @@ function MenuCr(path,obj)
 
         if( Array.isArray(menu[key]) )
         {
+            var parent_menu = path.split(".");
+            parent_menu = parent_menu[ parent_menu.length-2 ] + parent_menu[ parent_menu.length-1 ];
+
             btn.setAttribute("title",menu[key].join(" "));
             if(menu[key].length===0)
-                btn.dataset.search = key;
+                btn.dataset.search = parent_menu + " " + key;
             else
-                btn.dataset.search = key+" "+menu[key].join(" ");
+                btn.dataset.search = parent_menu + " " + key+" "+menu[key].join(" ");
         }
         else
         {
@@ -655,7 +676,7 @@ function MenuCr(path,obj)
             <option value="asmr">ASMR</option>
             <option value="mmd">MMD</option>
             </select>
-            <input type="text">
+            <input type="text"><BR>
             <input type="button" value="搜尋" data-detail_search="true">
         </div>
         `;
