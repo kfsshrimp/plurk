@@ -229,6 +229,7 @@ var G = {
             G.control.auto_scroll = true;
         });
 
+        /*
         G.click_timer = setInterval(()=>{
 
             if(G.chatframe.contentDocument.querySelectorAll(".yt-simple-endpoint.yt-dropdown-menu")[1]!==null)
@@ -238,6 +239,7 @@ var G = {
             }
 
         },1000);
+        */
         
 
         setTimeout(()=>{G.chat_ref();},1000);
