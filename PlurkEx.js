@@ -508,7 +508,7 @@ var kfsshrimp = {
                             {
                                 Ex.f.MsgPop("玩家人數未滿",e);
                                 Ex.obj.Ex_div.querySelectorAll(`input[data-event="Game"]`).forEach(o=>{
-                                    o.removeAttribute("disabled","disabled");
+                                    //o.removeAttribute("disabled","disabled");
                                 });
                                 return;
                             }
