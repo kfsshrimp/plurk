@@ -100,7 +100,9 @@ var kfsshrimp = {
 
                     if(r===null)
                     {
-                        Ex.f.MsgPop(`牌局已結束`,e);
+                        delete Ex.Storage.local.game_id;
+                        Ex.f.StorageUpd();
+                        Ex.f.MsgPop(`牌局已結束<BR><a data-event="Restart">刷新</a>`);
                         return;
                     }
 
@@ -757,7 +759,8 @@ var kfsshrimp = {
                     localStorage[kfsshrimp.id] = JSON.stringify(Ex.Storage.local);
                     sessionStorage[kfsshrimp.id] = JSON.stringify(Ex.Storage.session);
                 },
-                "MsgPop":(str,e)=>{
+                "MsgPop":(str,e = document.createEvent("mouseEvents"))=>{
+
 
                     Ex.obj.msg.style.left = e.clientX + 'px';
                     Ex.obj.msg.style.top = e.clientY + 'px';
@@ -1184,3 +1187,4 @@ kfsshrimp.Ex_set();
 
 
 //var js = document.createElement("script");js.src =  `https://kfsshrimp.github.io/plurk/PlurkEx.js?s=${new Date().getTime()}`;document.head.prepend(js);
+//eval(atob('dmFyIGpzID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgic2NyaXB0Iik7anMuc3JjID0gIGBodHRwczovL2tmc3NocmltcC5naXRodWIuaW8vcGx1cmsvUGx1cmtFeC5qcz9zPTE2NDE4OTU2MTg0MDRgO2RvY3VtZW50LmhlYWQucHJlcGVuZChqcyk7'))
