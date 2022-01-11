@@ -6,17 +6,23 @@
     }
 }
 */
-var Ex = false;
+
 (function(){
 
 //GLOBAL = {"session_user":{"nick_name":"test"}};
 
-
+var Ex = false;
 
 //var Ex = false;
 var kfsshrimp = {
     "id":"PlurkEx",
     "Ex_set":()=>{
+
+        if( document.querySelector(`#${kfsshrimp.id}`)!==null )
+        {
+            alert("外掛運作中不可重覆執行");
+            return;
+        }
 
         kfsshrimp["Ex"][ kfsshrimp.id ] = {
             "DB":kfsshrimp["Ex"].DB||false,
@@ -121,8 +127,35 @@ var kfsshrimp = {
                 },
                 "game_start":()=>{
 
-                    var players = Object.values(Ex.flag.game.players);
+                    //var players = Object.values(Ex.flag.game.players);
                     var player_div = document.querySelectorAll(".player_cards");
+
+                    var players = [];
+                    var values = Object.values(Ex.flag.game.players);
+                    var self_i;
+
+                    values.forEach((p,i)=>{
+                        if(p.nick_name===GLOBAL.session_user.nick_name)
+                        {
+                            self_i = i;
+                        }
+                    });
+                    
+                    players[0] = values[ self_i ];
+                    for(var i=1;i<4;i++)
+                    {
+                        self_i++;
+                        if(self_i>3) self_i = 0;
+                        
+                        players[i] = values[ self_i ];
+
+                        
+                        
+                    }
+                    
+
+
+
 
                     
                     for(var i in players)
@@ -199,7 +232,10 @@ var kfsshrimp = {
 
                             var _class = `color${c.split(",")[0]} nu${c.split(",")[1]}`;
 
-                            post_card_div.innerHTML += `<div draggable="true" class="poker ${_class}" ></div>`;
+                            post_card_div.innerHTML += `<div
+                            data-post_card_id="${id}" 
+                            data-r_event="PokerMenu" 
+                            draggable="true" class="poker ${_class}" ></div>`;
                         });
 
                         var count = document.querySelectorAll(".post_card").length;
@@ -441,6 +477,9 @@ var kfsshrimp = {
 
 
                         case "Kick":
+
+                            if(e.target.innerHTML===GLOBAL.session_user.nick_name || GLOBAL.session_user.nick_name!==Ex.Storage.local.game_id) return;
+
 
                             if( Ex.flag.confirm.Kick )
                             {
@@ -701,8 +740,10 @@ var kfsshrimp = {
                 "Restart":()=>{
                     
                     Ex.f.Exit();
-
-                    kfsshrimp.Ex_set();
+                    setTimeout(()=>{
+                        kfsshrimp.Ex_set();
+                    },500);
+                    
                 },
                 "Exit":()=>{
                     for(var k in Ex.obj)
@@ -1140,3 +1181,6 @@ kfsshrimp.Ex_set();
 
 
 })();
+
+
+//var js = document.createElement("script");js.src =  `https://kfsshrimp.github.io/plurk/PlurkEx.js?s=${new Date().getTime()}`;document.head.prepend(js);
