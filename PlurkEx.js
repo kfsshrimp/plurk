@@ -289,9 +289,9 @@ var kfsshrimp = {
 
                             <div draggable="true">
                             ${word}
-                                <input ${(word!='')?disabled="disabled":""} 
+                                <input ${(word!='')?`disabled="disabled"`:""} 
                                 type="button" data-event="Game" data-mode="join" value="參加牌局">
-                                <input ${(word!='')?disabled="disabled":""} 
+                                <input ${(word!='')?`disabled="disabled"`:""} 
                                 type="button" data-event="Game" data-mode="new" value="建立牌局">
                                 <BR>
                                 <input 
