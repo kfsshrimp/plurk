@@ -12,6 +12,7 @@ var Ex;
             "setTimeout":{}
         },
         "flag":{
+            "watermark_set":true,
             "c2d":{
                 "font":"bold 10px sans-serif",
                 "textAlign":"start",
@@ -133,6 +134,7 @@ var Ex;
                 text-align:center;
             }
 
+
             `
         },
         "obj":{},
@@ -153,11 +155,14 @@ var Ex;
                 <div class="ytp-menuitem-icon">
                 <img title="外掛資訊" class="icon-img" src="https://avatars.plurk.com/14556765-small9788529.gif"></div>
                 <div class="ytp-menuitem-label">快速截圖 (<span class="quickkey">Q</span>)</div>
-                <div class="ytp-menuitem-content"></div>
+                <div title="截圖左上時間浮水印" class="ytp-menuitem-content">
+                <div class="ytp-menuitem-toggle-checkbox"></div>
+                </div>
                 </div>`;
 
                 div.addEventListener("click",(e)=>{
 
+                    console.log(e.target.className);
                     switch (e.target.className)
                     {
                         case "ytp-menuitem-icon":
@@ -168,12 +173,18 @@ var Ex;
                             window.open("https://www.plurk.com/p/oplic7","_target");
                         break;
 
+                        case "ytp-menuitem-toggle-checkbox":
+                            Ex.flag.watermark_set = false;
+                            e.target.remove();
+                        break;
+                        
                         case "ytp-menuitem-content":
                             
-                            e.target.innerHTML = `<div class="ytp-menuitem-toggle-checkbox"></div>`;
-                            e.target.querySelector("div").addEventListener("click",e=>{
-                                e.target.remove();
-                            });
+                            if(e.target.children.length===0)
+                            {
+                                Ex.flag.watermark_set = true;
+                                e.target.innerHTML = `<div class="ytp-menuitem-toggle-checkbox"></div>`;
+                            }
                             
                         break;
                         case "quickkey":
@@ -206,7 +217,9 @@ var Ex;
                     {
                         e.preventDefault();
                         e.stopPropagation();
-                        var n_w = window.open("","_target",`width=${video.clientWidth+5},height=${video.clientHeight+5}`);
+                        
+
+                        var n_w = window.open("",``,`width=${video.clientWidth+5},height=${video.clientHeight+5}`);
                         n_w.document.body.style = "margin:0px";
                         n_w.document.body.innerHTML = `<img src="${e.target.toDataURL()}">`;
                     }
@@ -236,19 +249,24 @@ var Ex;
                 var canvas = document.createElement("canvas");
                 var c2d = canvas.getContext("2d");
                 var video = Ex.obj.video;
+                canvas.id = Math.floor(video.currentTime);
                 canvas.setAttribute("draggable","true");
+                canvas.dataset.draggable_remove = "true";
                 canvas.width = video.clientWidth;
                 canvas.height = video.clientHeight;
-
                 c2d.drawImage(video,0,0,video.clientWidth,video.clientHeight);
 
-                c2d.font = Ex.flag.c2d.font;
-                c2d.textAlign = Ex.flag.c2d.textAlign;
-                c2d.textBaseline = Ex.flag.c2d.textBaseline;
-                c2d.fillStyle = Ex.flag.c2d.fillStyle;
-                c2d.strokeStyle = Ex.flag.c2d.strokeStyle;
-                c2d.strokeText( Ex.f.YtCurrentTime( Math.floor(video.currentTime) ), Ex.flag.c2d.x, Ex.flag.c2d.y);
-                c2d.fillText( Ex.f.YtCurrentTime( Math.floor(video.currentTime) ), Ex.flag.c2d.x, Ex.flag.c2d.y);
+
+                if(Ex.flag.watermark_set===true)
+                {
+                    c2d.font = Ex.flag.c2d.font;
+                    c2d.textAlign = Ex.flag.c2d.textAlign;
+                    c2d.textBaseline = Ex.flag.c2d.textBaseline;
+                    c2d.fillStyle = Ex.flag.c2d.fillStyle;
+                    c2d.strokeStyle = Ex.flag.c2d.strokeStyle;
+                    c2d.strokeText( Ex.f.YtCurrentTime( Math.floor(video.currentTime) ), Ex.flag.c2d.x, Ex.flag.c2d.y);
+                    c2d.fillText( Ex.f.YtCurrentTime( Math.floor(video.currentTime) ), Ex.flag.c2d.x, Ex.flag.c2d.y);
+                }
 
                 c2d.font = Ex.flag.watermark.font;
                 Ex.flag.watermark.x = Ex.obj.video.clientWidth - 90;
@@ -406,6 +424,12 @@ var Ex;
                     {
                         e.target.style.left = e.clientX - Ex.flag.mousedown.offsetX + "px";
                         e.target.style.top = e.clientY - Ex.flag.mousedown.offsetY + "px";
+
+                        if(e.target.dataset.draggable_remove==="true" && e.target.style.top.split("px")[0]*-1>=Math.floor(e.target.clientHeight/2))
+                        {
+                            e.target.remove();
+                        }
+
                     }
                 });
                     
