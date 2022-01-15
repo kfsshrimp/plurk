@@ -1,5 +1,5 @@
+var Ex;
 (function(){
-    var Ex;
     Ex = {
         "id":"Ytscreenshot",
         "DB":false,
@@ -161,7 +161,7 @@
                     switch (e.target.className)
                     {
                         case "ytp-menuitem-icon":
-                            window.open("https://www.plurk.com/kfsshrimp4","_target");
+                            window.open("https://www.plurk.com/p/oplic7","_target");
                         break;
 
                         case "ytp-menuitem-content":
