@@ -151,7 +151,7 @@ var Ex;
                 div.setAttribute("aria-checked","true");
                 div.innerHTML = `
                 <div class="ytp-menuitem-icon">
-                <img title="外掛資訊" src="https://avatars.plurk.com/14556765-small9788529.gif"></div>
+                <img title="外掛資訊" class="icon-img" src="https://avatars.plurk.com/14556765-small9788529.gif"></div>
                 <div class="ytp-menuitem-label">快速截圖 (<span class="quickkey">Q</span>)</div>
                 <div class="ytp-menuitem-content"></div>
                 </div>`;
@@ -161,6 +161,10 @@ var Ex;
                     switch (e.target.className)
                     {
                         case "ytp-menuitem-icon":
+                            window.open("https://www.plurk.com/p/oplic7","_target");
+                        break;
+
+                        case "icon-img":
                             window.open("https://www.plurk.com/p/oplic7","_target");
                         break;
 
