@@ -147,6 +147,55 @@ var Ex;
                 Ex.obj.screenshot.id = "screenshot";
                 document.body.prepend(Ex.obj.screenshot);
 
+
+
+                var div2 = document.createElement("div");
+                div2.id = Ex.id;
+                div2.className = `ytp-menuitem`;
+                div2.setAttribute("aria-checked","true");
+                div2.innerHTML = `
+                <div class="ytp-menuitem-icon"></div>
+                <div class="ytp-menuitem-label">影像90度</div>
+                <div class="ytp-menuitem-content"></div>
+                </div>
+                </div>`;
+                div2.addEventListener("click",e=>{
+                    if(e.target.parentElement.querySelector(".ytp-menuitem-content").children.length===0)
+                    {
+                        e.target.parentElement.querySelector(".ytp-menuitem-content").innerHTML = `<div class="ytp-menuitem-toggle-checkbox"></div>`;
+                    }
+                    else
+                    {
+                        e.target.parentElement.querySelector(".ytp-menuitem-content").innerHTML = ``;
+                    }
+                    Ex.f.VideoRotate();
+                })
+
+                var div3 = document.createElement("div");
+                div3.id = Ex.id;
+                div3.className = `ytp-menuitem`;
+                div3.setAttribute("aria-checked","true");
+                div3.innerHTML = `
+                <div class="ytp-menuitem-icon"></div>
+                <div class="ytp-menuitem-label">子母視窗</div>
+                <div class="ytp-menuitem-content"></div>
+                </div>
+                </div>`;
+
+                div3.addEventListener("click",e=>{
+                    if(e.target.parentElement.querySelector(".ytp-menuitem-content").children.length===0)
+                    {
+                        e.target.parentElement.querySelector(".ytp-menuitem-content").innerHTML = `<div class="ytp-menuitem-toggle-checkbox"></div>`;
+                        Ex.obj.video.requestPictureInPicture()
+                    }
+                    else
+                    {
+                        e.target.parentElement.querySelector(".ytp-menuitem-content").innerHTML = ``;
+                        document.exitPictureInPicture();
+                    }
+                })
+
+
                 var div = document.createElement("div");
                 div.id = Ex.id;
                 div.className = `ytp-menuitem`;
@@ -154,7 +203,7 @@ var Ex;
                 div.innerHTML = `
                 <div class="ytp-menuitem-icon">
                 <img title="外掛資訊" class="icon-img" src="https://avatars.plurk.com/14556765-small9788529.gif"></div>
-                <div class="ytp-menuitem-label">快速截圖 (<span class="quickkey">Q</span>)</div>
+                <div class="ytp-menuitem-label">快速截圖 (<span title="快截鍵更改" class="quickkey">Q</span>)</div>
                 <div title="截圖左上時間浮水印" class="ytp-menuitem-content">
                 <div class="ytp-menuitem-toggle-checkbox"></div>
                 </div>
@@ -166,11 +215,11 @@ var Ex;
                     switch (e.target.className)
                     {
                         case "ytp-menuitem-icon":
-                            window.open("https://www.plurk.com/p/oplic7","_target");
+                            window.open("https://www.plurk.com/p/oplic7","plurk");
                         break;
 
                         case "icon-img":
-                            window.open("https://www.plurk.com/p/oplic7","_target");
+                            window.open("https://www.plurk.com/p/oplic7","plurk");
                         break;
 
                         case "ytp-menuitem-toggle-checkbox":
@@ -209,16 +258,18 @@ var Ex;
                     var video = Ex.obj.video;
 
                     if(document.querySelector(".ytp-popup.ytp-contextmenu .ytp-panel-menu")!==null && 
-                    document.querySelector(".ytp-popup.ytp-contextmenu .ytp-panel-menu #kfsshrimp")===null)
+                    document.querySelector(`.ytp-popup.ytp-contextmenu .ytp-panel-menu #${Ex.id}`)===null)
                     {
+                        document.querySelector(".ytp-popup.ytp-contextmenu .ytp-panel-menu").prepend(div3);
+                        document.querySelector(".ytp-popup.ytp-contextmenu .ytp-panel-menu").prepend(div2);
                         document.querySelector(".ytp-popup.ytp-contextmenu .ytp-panel-menu").prepend(div);
                     }
+
                     if(e.target.nodeName==="CANVAS")
                     {
                         e.preventDefault();
                         e.stopPropagation();
                         
-
                         var n_w = window.open("",``,`width=${video.clientWidth+5},height=${video.clientHeight+5}`);
                         n_w.document.body.style = "margin:0px";
                         n_w.document.body.innerHTML = `<img src="${e.target.toDataURL()}">`;
@@ -239,8 +290,17 @@ var Ex;
                 })
 
             },
-            "quickkey_set_end":()=>{
-                Ex.flag.quickkey_set = false;
+            "VideoRotate":()=>{
+
+                if(document.querySelector("#player").style.transform!==``){
+                    document.querySelector("#player").style.transform=``;
+                    document.querySelector(".ytp-chrome-bottom").style=``;
+                    document.querySelector(".html5-video-player").appendChild(document.querySelector(".ytp-chrome-bottom"));
+                }else{
+                    document.querySelector("#player").style.transform ="translate(-450px, 0px) rotateZ(90deg) scale(0.7)";
+                    document.querySelector(".ytp-chrome-bottom").style = `width:`+document.querySelector(".ytp-chrome-bottom").style.width+`;left:300px;top:10px;opacity: 1;z-index: 9999;background: #000;`;
+                    document.querySelector("#player").parentElement.prepend( document.querySelector(".ytp-chrome-bottom") );
+                }
             },
             "getImage":()=>{
 
