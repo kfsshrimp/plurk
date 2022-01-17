@@ -12,6 +12,7 @@ var Ex;
             "setTimeout":{}
         },
         "flag":{
+            "plurk":{}
            
         },
         "config":{},
@@ -88,16 +89,85 @@ var Ex;
         },
         "obj":{},
         "f":{
-            "plurk":{
-                "ResponsesManager":ResponsesManager
-                /*
+            "GetPlurk":(pid)=>{
+                console.log("GETPLURK");
+                Ex.flag.plurk[ pid ] = PlurksManager.getPlurkById(pid);
+
+                if(Ex.flag.plurk[ pid ].response_count!==0)
+                    Ex.f.GetRePlurk( pid );
+            },
+            "GetRePlurk":(pid)=>{
+
+                ResponsesManager.loadResponses( pid );
+
+                var _t = setInterval(()=>{
+                    if(ResponsesManager.getPlurkResponses( pid ).length!==0)
+                    {
+                        clearInterval(_t);
+
+                        ResponsesManager.loadOlderResponses( pid,!0);
+                        Ex.flag.plurk[ pid ]._replurk =  ResponsesManager.getPlurkResponses( pid );
+                    }
+                },500);
+
+
+
+                /*"ResponsesManager":ResponsesManager
                 ResponsesManager.loadResponses( parseInt('ophxn9',36) )
                 ResponsesManager.loadOlderResponses( parseInt('ophxn9',36) , !0)
                 ResponsesManager.getPlurkResponses( parseInt('ophxn9',36) )
+
+
+                PlurkAdder.addPlurk({qualifier: ":",content:"test1" })
+                PlurkAdder.addResponse( {plurk_id:parseInt("opmub0",36),owner_id:14556765},"test2",":")
+                PlurkAdder.editPlurk({plurk_id:parseInt("opmub0",36),id:parseInt("opmub0",36)},"aaa")
+
                 */
             },
             "plurk_obj_set":()=>{
 
+                Ex.obj.vote_btn = document.createElement("div");
+                Ex.obj.vote_btn.className = "submit_img submit_img_color";
+                Ex.obj.vote_btn.style.fontSize = "20px";
+                Ex.obj.vote_btn.innerHTML = "發起投票";
+
+                Ex.obj.vote_btn.dataset.event = "ClickEvent";
+                Ex.obj.vote_btn.dataset.mode = "CreateVote";
+
+                document.querySelector(".plurkForm:not(.mini-mode) .submit_img").parentElement.insertBefore( Ex.obj.vote_btn ,document.querySelector(".plurkForm:not(.mini-mode) .submit_img"));
+
+                console.log('plurk_obj_set');
+
+                Ex.Clock.setInterval.GetVotePlurk = setInterval(()=>{
+
+                    document.querySelectorAll(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"]`).forEach(o=>{
+                        //if(o.innerHTML.indexOf("【投票】")===-1) return;
+    
+                        
+                        if(Ex.flag.plurk[ o.dataset.pid ]!=undefined) return;
+                        
+                        Ex.f.GetPlurk( o.dataset.pid );
+                        
+                        
+                    });
+
+                },1000);
+                
+
+
+            },
+            "ClickEvent":(e)=>{
+
+                switch (e.target.dataset.mode)
+                {
+                    case "CreateVote":
+                        PlurkAdder.addPlurk({
+                            qualifier: ":",
+                            content:`【TEST】\n${document.querySelector("#input_big").value}`
+                        });
+                    break;
+
+                }
 
             },
             "DB_set":function( URL,func ){
