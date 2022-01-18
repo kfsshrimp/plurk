@@ -1,6 +1,5 @@
-var Ex;    
 (function(){
-
+    var Ex;    
     Ex = {
         "id":"Plurk",
         "DB":false,
@@ -20,7 +19,8 @@ var Ex;
             "canvas":{
                 "height":80,
                 "width":80
-            }
+            },
+            "vote_max":6
         },
         "template":{},
         "style":()=>{
@@ -177,8 +177,7 @@ var Ex;
 
                 Ex.flag.plurk[ pid ] = PlurksManager.getPlurkById(pid);
 
-                if(Ex.flag.plurk[ pid ].response_count!==0)
-                    Ex.f.GetRePlurk( pid );
+                Ex.f.GetRePlurk( pid );
 
             },
             "GetRePlurk":(pid)=>{
@@ -252,10 +251,11 @@ var Ex;
 
                     if(
                         isNaN(parseInt(v.content))===true ||
-                        uid_check.indexOf( v.user_id )!==-1
+                        uid_check.indexOf( v.user_id )!==-1 || 
+                        v.content>Ex.config.vote_max
                     ) return;
 
-                    uid_check.push( v.user_id );
+                    //uid_check.push( v.user_id );
 
 
                     plurk._vote[ v.content ] = 
@@ -298,7 +298,7 @@ var Ex;
 
                        
                         if( Ex.flag.plurk[ o.dataset.pid ]._replurk!==undefined )
-                            Ex.f.RePlurkHandle( o.dataset.pid );
+                            Ex.f.RePlurkToPieChart( o.dataset.pid );
 
                     });
 
@@ -418,12 +418,12 @@ var Ex;
 
 
                 var color = [
-                    "#f00",
-                    "#0f0",
-                    "#00f",
-                    "#ff0",
-                    "#f0f",
-                    "#0ff"
+                    "#8f8681",
+                    "#32435F",
+                    "#E4B660",
+                    "#FE7773",
+                    "#028C6A",
+                    "#1D6A96"
                 ];
 
                 
@@ -465,6 +465,8 @@ var Ex;
 
                     deg_start = deg_end;
                 }
+                
+                word +=`<li>總票數：${total}</li>`;
 
                 plurk_div.querySelector("#VoteInfo").innerHTML = `<ul>${word}</ul>`;
 
@@ -505,8 +507,6 @@ var Ex;
 
                     case "AddOption":
 
-                        if(e.target.parentElement.querySelectorAll(`input[type="text"]`).length===5) e.target.setAttribute("disabled","disabled");
-
                         var option = document.createElement("input");
                         option.type = "text";
                         option.setAttribute("placeholder",`選項${e.target.parentElement.querySelectorAll(`input[type="text"]`).length+1}`);
@@ -517,11 +517,13 @@ var Ex;
                         e.target.parentElement.querySelector("div").appendChild(option);
                         e.target.parentElement.querySelector("div").appendChild(span);
 
+                        if(e.target.parentElement.querySelectorAll(`input[type="text"]`).length>=Ex.config.vote_max) e.target.setAttribute("disabled","disabled");
+
                     break;
 
                     case "SubmitVote":
 
-                        var content = `【投票】\n`;
+                        var content = `【投票】\n${document.querySelector("#input_big").value}\n`;
                         var check = false;
 
                         e.target.parentElement.querySelectorAll(`input[type="text"]`).forEach( (o,i)=>{
