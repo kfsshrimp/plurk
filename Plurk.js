@@ -1,5 +1,5 @@
-var Ex;
 (function(){
+    var Ex;
     Ex = {
         "id":"Plurk",
         "DB":false,
@@ -15,7 +15,12 @@ var Ex;
             "plurk":{}
            
         },
-        "config":{},
+        "config":{
+            "canvas":{
+                "height":80,
+                "width":80
+            }
+        },
         "template":{},
         "style":()=>{
             return `
@@ -35,6 +40,11 @@ var Ex;
                 padding:5px;
                 color: #000;
                 z-index:9999;
+            }
+
+            #${Ex.id}-Msg input[type="button"]{
+                padding: 4px 6px;
+                font-size: 12px;
             }
 
             #${Ex.id}-Menu{
@@ -85,16 +95,100 @@ var Ex;
                     transform: rotateZ(360deg);
                 }
             }
+
+            canvas{
+                position: absolute;
+                left: 100%;
+                border-radius: 50%;
+                border: 1px double #fff;
+                transition-duration: 0.8s;
+            }
+            canvas:hover{
+                transform: scale(1.2);
+            }
+
+            div#VoteInfo{
+                position: absolute;
+                width: auto;
+                height: auto;
+                left: 100%;
+                top: 90px;
+                background: #fff8;
+                color: #000;
+                padding: 2px 2px;
+                margin: 2px;
+                border-radius: 5px;
+                border: 2px double #fff;
+                opacity:0;
+                transition-duration: 0.8s;
+            }
+            div#VoteInfo:hover{
+                opacity:1 !important;
+            }
+            div#VoteInfo li{
+                
+                border-radius: 5px;
+                padding: 1px 8px;
+                margin-bottom: 2px;
+            }
+
+            div#VoteOption {
+                display: grid;
+                min-width: 110px;
+            }
+
+            div#VoteOption input[type="text"]{
+                width: 100px;
+            }
+
+            div#VoteOption span{
+                display:none;
+                color:#f00;
+                width: 0px;
+                margin: -20px 0 0 104px;
+            }
+            div#VoteOption span.error{
+                display:block;
+            }
+
             `
         },
         "obj":{},
         "f":{
             "GetPlurk":(pid)=>{
+
                 console.log("GETPLURK");
                 Ex.flag.plurk[ pid ] = PlurksManager.getPlurkById(pid);
 
                 if(Ex.flag.plurk[ pid ].response_count!==0)
                     Ex.f.GetRePlurk( pid );
+
+            },
+            "RePlurkHandle":(replurk)=>{
+
+                //console.log(replurk);
+
+                var plurk_div = document.querySelector(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"][data-pid="${replurk[0].plurk_id}"]`);
+
+                var plurk = Ex.flag.plurk[ replurk[0].plurk_id ];
+
+                plurk._vote = {};
+
+
+                replurk.forEach(v=>{
+
+                    if(isNaN(parseInt(v.content))===true) return;
+
+                    plurk._vote[ v.content ] = 
+                    (plurk._vote[ v.content ]||0)+1;
+                });
+
+                if(Object.keys(plurk._vote).length>0)
+                {
+                    Ex.f.PieChart(plurk_div);
+                }
+                
+
             },
             "GetRePlurk":(pid)=>{
 
@@ -107,10 +201,10 @@ var Ex;
 
                         ResponsesManager.loadOlderResponses( pid,!0);
                         Ex.flag.plurk[ pid ]._replurk =  ResponsesManager.getPlurkResponses( pid );
+
+                        Ex.f.RePlurkHandle(Ex.flag.plurk[ pid ]._replurk);
                     }
                 },500);
-
-
 
                 /*"ResponsesManager":ResponsesManager
                 ResponsesManager.loadResponses( parseInt('ophxn9',36) )
@@ -126,6 +220,7 @@ var Ex;
             },
             "plurk_obj_set":()=>{
 
+                
                 Ex.obj.vote_btn = document.createElement("div");
                 Ex.obj.vote_btn.className = "submit_img submit_img_color";
                 Ex.obj.vote_btn.style.fontSize = "20px";
@@ -139,16 +234,23 @@ var Ex;
                 console.log('plurk_obj_set');
 
                 Ex.Clock.setInterval.GetVotePlurk = setInterval(()=>{
+                    console.log('test');
+
+                    /*
+                    :not(${Object.keys(Ex.flag.plurk).map(a=>{return `[data-pid="${a}"]`;}).join(",")||'a'})`
+                    */
 
                     document.querySelectorAll(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"]`).forEach(o=>{
-                        //if(o.innerHTML.indexOf("【投票】")===-1) return;
+
+                        if(o.innerHTML.indexOf("【投票】")===-1) return;
     
-                        
-                        if(Ex.flag.plurk[ o.dataset.pid ]!=undefined) return;
-                        
-                        Ex.f.GetPlurk( o.dataset.pid );
-                        
-                        
+                        if(Ex.flag.plurk[ o.dataset.pid ]===undefined) 
+                            Ex.f.GetPlurk( o.dataset.pid );
+
+                       
+                        if( Ex.flag.plurk[ o.dataset.pid ]._replurk!==undefined )
+                            Ex.f.RePlurkHandle(Ex.flag.plurk[ o.dataset.pid ]._replurk);
+
                     });
 
                 },1000);
@@ -156,19 +258,185 @@ var Ex;
 
 
             },
+            "PieChart":(plurk_div)=>{
+
+                if(plurk_div.querySelector("canvas")===null)
+                {
+                    plurk_div.innerHTML = `
+                        <canvas style="opacity:0;" 
+                        data-m_event="MouseEvent" 
+                        data-mode="VoteInfo" 
+                        height="${Ex.config.canvas.height}" width="${Ex.config.canvas.width}">
+                        </canvas>
+                        <div id="VoteInfo"></div>
+                        ${plurk_div.innerHTML}
+                    `;
+
+                    plurk_div.querySelector("canvas").addEventListener("mouseleave",(e)=>{
+                        e.target.parentElement.querySelector("div#VoteInfo").style.opacity = "0";
+                    });
+
+                }
+
+                var canvas = plurk_div.querySelector("canvas")
+                var c2d = canvas.getContext("2d");
+                var x = Math.floor(canvas.width/2);
+                var y = Math.floor(canvas.height/2);
+                var r = x;
+                var p = 2*Math.PI;
+                var deg_start = 0;
+                var deg_end; 
+                var vote = Ex.flag.plurk[ canvas.parentElement.dataset.pid ]._vote;
+
+                var total = Object.values(vote).reduce( (a,b)=>{return a+b;});
+
+
+                var color = [
+                    "#f00",
+                    "#0f0",
+                    "#00f",
+                    "#ff0",
+                    "#f0f",
+                    "#0ff"
+                ];
+
+                
+                /*
+                var color = [
+                    "#f00",
+                    "#0f0",
+                    "#00f",
+                    "#ff0",
+                    "#f0f",
+                    "#0ff",
+                    "#000"
+                ]
+                */
+               
+                var word = ``;
+                var count = 0;
+                for(var i in vote)
+                {
+                    word+=`<li style="background:${color[count]}8">${count+1}：${vote[i]}票(${Math.floor(vote[i]/total*100)}%)</li>`;
+
+                    deg_end = deg_start + vote[i];
+
+                    c2d.beginPath();
+                    c2d.moveTo(x,y);
+                    c2d.arc(x,y,r,deg_start/total*p,deg_end/total*p);
+
+                    var grd = c2d.createRadialGradient(x,y,0,x,y,r);
+                    grd.addColorStop(0,"#888");
+                    grd.addColorStop(1,color[count]);
+
+
+                    c2d.fillStyle = grd;
+                    c2d.strokeStyle = "#fff";
+                    c2d.fill();
+                    //c2d.stroke();
+
+                    count++;
+
+                    deg_start = deg_end;
+                }
+
+                plurk_div.querySelector("#VoteInfo").innerHTML = `<ul>${word}</ul>`;
+                setTimeout(()=>{
+                    plurk_div.querySelector("canvas").style.opacity = "1";
+                },1000);
+                
+
+            },
             "ClickEvent":(e)=>{
 
                 switch (e.target.dataset.mode)
                 {
                     case "CreateVote":
+
+                        e =  new MouseEvent("click",{
+                            clientX: Math.floor(window.innerWidth/2),
+                            clientY: Math.floor(window.innerHeight/4)
+                        });
+                        
+
+                        Ex.f.MsgPop(`
+                        <div id="VoteOption">
+                        <input type="text" placeholder="選項1"><span>*</span>
+                        <input type="text" placeholder="選項2"><span>*</span>
+                        </div>
+                        <input 
+                        data-event="ClickEvent" 
+                        data-mode="SubmitVote"
+                        type="button" value="送出">
+                        <input 
+                        data-event="ClickEvent" 
+                        data-mode="AddOption"
+                        type="button" value="增加選項">`,e);
+
+                    break;
+
+                    case "AddOption":
+
+                        if(e.target.parentElement.querySelectorAll(`input[type="text"]`).length===5) e.target.setAttribute("disabled","disabled");
+
+                        var option = document.createElement("input");
+                        option.type = "text";
+                        option.setAttribute("placeholder",`選項${e.target.parentElement.querySelectorAll(`input[type="text"]`).length+1}`);
+                        var span = document.createElement("span");
+                        span.innerHTML = "*";
+
+
+                        e.target.parentElement.querySelector("div").appendChild(option);
+                        e.target.parentElement.querySelector("div").appendChild(span);
+
+                    break;
+
+                    case "SubmitVote":
+
+                        var content = `【投票】\n`;
+                        var check = false;
+
+                        e.target.parentElement.querySelectorAll(`input[type="text"]`).forEach( (o,i)=>{
+                            if(o.value===``)
+                            {
+                                o.focus();
+                                e.target.parentElement.querySelectorAll(`span`)[i].classList.add("error");
+                                check = true;
+                            }
+                            else
+                            {
+                                e.target.parentElement.querySelectorAll(`span`)[i].classList.remove("error");
+                            }
+
+                            content += `【${i+1}】${o.value}\n`;
+                        });
+
+                        if(check)
+                        {
+                            return;
+                        }
+
+                        
                         PlurkAdder.addPlurk({
                             qualifier: ":",
-                            content:`【TEST】\n${document.querySelector("#input_big").value}`
+                            content:content
                         });
+                        
+
+                        Ex.f.MsgPop('投票噗建立完成',e);
                     break;
 
                 }
+            },
+            "MouseEvent":(e)=>{
 
+                switch (e.target.dataset.mode)
+                {
+                    case "VoteInfo":
+                        e.target.parentElement.querySelector("div#VoteInfo").style.opacity = "1";
+                    break;
+
+                }
             },
             "DB_set":function( URL,func ){
 
@@ -275,14 +543,22 @@ var Ex;
             },
             "default":()=>{
 
+
+                /*
                 Ex.Clock.setInterval.flag = setInterval(()=>{
                     Ex.f.FlagUpd();
                 },1000);
+                */
+
+                if(document.querySelectorAll(".plurkForm:not(.mini-mode) .submit_img").length>1)
+                {
+                    return;
+                }
 
 
                 document.addEventListener("dragend",function(e){
 
-                    console.log('test');
+
                     if(e.target.getAttribute("draggable")==="true")
                     {
                         e.target.style.left = e.clientX - Ex.flag.mousedown.offsetX + "px";
@@ -295,7 +571,11 @@ var Ex;
 
                     }
                 });
-                    
+
+                document.addEventListener("mouseover",function(e){
+                    if(e.target.dataset.m_event!==undefined) Ex.f[ e.target.dataset.m_event ](e);
+                });
+
 
                 document.addEventListener("mousedown",function(e){
                     Ex.flag.mousedown = e;
@@ -321,7 +601,6 @@ var Ex;
                     "local":JSON.parse(localStorage[Ex.id]||`{}`),
                     "session":JSON.parse(sessionStorage[Ex.id]||`{}`)
                 }
-
                 
                 Ex.f.style_set();
                 Ex.f.obj_set();
