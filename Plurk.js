@@ -255,7 +255,7 @@
                         v.content>Ex.config.vote_max
                     ) return;
 
-                    //uid_check.push( v.user_id );
+                    uid_check.push( v.user_id );
 
 
                     plurk._vote[ v.content ] = 
