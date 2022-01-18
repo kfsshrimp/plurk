@@ -1,6 +1,5 @@
-var Ex;
 (function(){
-    
+    var Ex;    
     Ex = {
         "id":"Plurk",
         "DB":false,
