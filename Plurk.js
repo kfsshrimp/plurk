@@ -1,5 +1,6 @@
+var Ex;
 (function(){
-    var Ex;
+    
     Ex = {
         "id":"Plurk",
         "DB":false,
@@ -164,20 +165,44 @@
                     Ex.f.GetRePlurk( pid );
 
             },
-            "RePlurkHandle":(replurk)=>{
+            "RePlurkHandle":(pid)=>{
+
+                replurk = Ex.flag.plurk[ pid ]._replurk
 
                 //console.log(replurk);
+                if(replurk[0]===undefined)
+                {
+                    document.querySelector(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"][data-pid="${pid}"]`).querySelectorAll("canvas,#VoteInfo").forEach(o=>{o.remove();})
 
-                var plurk_div = document.querySelector(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"][data-pid="${replurk[0].plurk_id}"]`);
+                    return;
+                }
+
+                
+
+                var plurk_div = document.querySelector(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"][data-pid="${pid}"]`);
 
                 var plurk = Ex.flag.plurk[ replurk[0].plurk_id ];
 
-                plurk._vote = {};
+                plurk._vote = {
+                    "1":0,
+                    "2":0,
+                    "3":0,
+                    "4":0,
+                    "5":0,
+                    "6":0
+                };
 
+                
 
+                var uid_check = [];
                 replurk.forEach(v=>{
 
-                    if(isNaN(parseInt(v.content))===true) return;
+                    if(
+                        isNaN(parseInt(v.content))===true 
+                    ) return;
+
+                    uid_check.push( v.user_id );
+
 
                     plurk._vote[ v.content ] = 
                     (plurk._vote[ v.content ]||0)+1;
@@ -202,7 +227,7 @@
                         ResponsesManager.loadOlderResponses( pid,!0);
                         Ex.flag.plurk[ pid ]._replurk =  ResponsesManager.getPlurkResponses( pid );
 
-                        Ex.f.RePlurkHandle(Ex.flag.plurk[ pid ]._replurk);
+                        Ex.f.RePlurkHandle( pid );
                     }
                 },500);
 
@@ -249,7 +274,7 @@
 
                        
                         if( Ex.flag.plurk[ o.dataset.pid ]._replurk!==undefined )
-                            Ex.f.RePlurkHandle(Ex.flag.plurk[ o.dataset.pid ]._replurk);
+                            Ex.f.RePlurkHandle( o.dataset.pid );
 
                     });
 
@@ -341,7 +366,9 @@
                 }
 
                 plurk_div.querySelector("#VoteInfo").innerHTML = `<ul>${word}</ul>`;
+
                 setTimeout(()=>{
+                    if(plurk_div.querySelector("canvas")!==null)
                     plurk_div.querySelector("canvas").style.opacity = "1";
                 },1000);
                 
