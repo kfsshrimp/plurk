@@ -197,7 +197,8 @@
                 replurk.forEach(v=>{
 
                     if(
-                        isNaN(parseInt(v.content))===true 
+                        isNaN(parseInt(v.content))===true ||
+                        uid_check.indexOf( v.user_id )!==-1
                     ) return;
 
                     uid_check.push( v.user_id );
