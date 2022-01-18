@@ -1,5 +1,6 @@
+var Ex;    
 (function(){
-    var Ex;    
+
     Ex = {
         "id":"Plurk",
         "DB":false,
@@ -151,20 +152,77 @@
                 display:block;
             }
 
+            #response-search {
+                transition-duration: 0.3s;
+                position: absolute;
+                z-index: 9999;
+                display: inline;
+                margin-top: 0px;
+                margin-left: 260px;
+            }
+
+            #response-search input{
+                height: 20px;
+                font-size: 12px;
+                width: 80px;
+            }
+            
+            
+
             `
         },
         "obj":{},
         "f":{
             "GetPlurk":(pid)=>{
 
-                console.log("GETPLURK");
                 Ex.flag.plurk[ pid ] = PlurksManager.getPlurkById(pid);
 
                 if(Ex.flag.plurk[ pid ].response_count!==0)
                     Ex.f.GetRePlurk( pid );
 
             },
-            "RePlurkHandle":(pid)=>{
+            "GetRePlurk":(pid)=>{
+
+                ResponsesManager.loadResponses( pid );
+
+                var _t = setInterval(()=>{
+
+                    if(ResponsesManager.getPlurkResponses( pid ).length!==0)
+                    {
+                        clearInterval(_t);
+
+                        ResponsesManager.loadOlderResponses( pid,!0);
+                        Ex.flag.plurk[ pid ]._replurk =  ResponsesManager.getPlurkResponses( pid );
+
+                        if(Ex.flag.plurk[ pid ].owner_id!==99999)
+                        {
+                            Ex.flag.plurk[ pid ]._re_user = ResponsesManager.getPlurkResponsesUsers(pid).map( d=>{
+                                return Users.getUserById(d)
+                            });
+                        }
+                        
+                        if(document.querySelector(`div[data-pid="${pid}"]`).innerHTML.indexOf("【投票】")!==-1)
+                        {
+                            Ex.f.RePlurkToPieChart( pid );
+                        }
+                        
+                    }
+
+                },500);
+
+                /*"ResponsesManager":ResponsesManager
+                ResponsesManager.loadResponses( parseInt('ophxn9',36) )
+                ResponsesManager.loadOlderResponses( parseInt('ophxn9',36) , !0)
+                ResponsesManager.getPlurkResponses( parseInt('ophxn9',36) )
+
+
+                PlurkAdder.addPlurk({qualifier: ":",content:"test1" })
+                PlurkAdder.addResponse( {plurk_id:parseInt("opmub0",36),owner_id:14556765},"test2",":")
+                PlurkAdder.editPlurk({plurk_id:parseInt("opmub0",36),id:parseInt("opmub0",36)},"aaa")
+
+                */
+            },
+            "RePlurkToPieChart":(pid)=>{
 
                 replurk = Ex.flag.plurk[ pid ]._replurk
 
@@ -175,8 +233,6 @@
 
                     return;
                 }
-
-                
 
                 var plurk_div = document.querySelector(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"][data-pid="${pid}"]`);
 
@@ -190,8 +246,6 @@
                     "5":0,
                     "6":0
                 };
-
-                
 
                 var uid_check = [];
                 replurk.forEach(v=>{
@@ -212,36 +266,7 @@
                 {
                     Ex.f.PieChart(plurk_div);
                 }
-                
 
-            },
-            "GetRePlurk":(pid)=>{
-
-                ResponsesManager.loadResponses( pid );
-
-                var _t = setInterval(()=>{
-                    if(ResponsesManager.getPlurkResponses( pid ).length!==0)
-                    {
-                        clearInterval(_t);
-
-                        ResponsesManager.loadOlderResponses( pid,!0);
-                        Ex.flag.plurk[ pid ]._replurk =  ResponsesManager.getPlurkResponses( pid );
-
-                        Ex.f.RePlurkHandle( pid );
-                    }
-                },500);
-
-                /*"ResponsesManager":ResponsesManager
-                ResponsesManager.loadResponses( parseInt('ophxn9',36) )
-                ResponsesManager.loadOlderResponses( parseInt('ophxn9',36) , !0)
-                ResponsesManager.getPlurkResponses( parseInt('ophxn9',36) )
-
-
-                PlurkAdder.addPlurk({qualifier: ":",content:"test1" })
-                PlurkAdder.addResponse( {plurk_id:parseInt("opmub0",36),owner_id:14556765},"test2",":")
-                PlurkAdder.editPlurk({plurk_id:parseInt("opmub0",36),id:parseInt("opmub0",36)},"aaa")
-
-                */
             },
             "plurk_obj_set":()=>{
 
@@ -259,7 +284,6 @@
                 console.log('plurk_obj_set');
 
                 Ex.Clock.setInterval.GetVotePlurk = setInterval(()=>{
-                    console.log('test');
 
                     /*
                     :not(${Object.keys(Ex.flag.plurk).map(a=>{return `[data-pid="${a}"]`;}).join(",")||'a'})`
@@ -278,10 +302,87 @@
 
                     });
 
+                    
+                    document.querySelectorAll(`#cbox_response,#form_holder`).forEach(o=>{
+
+                        if(o.querySelector(`#response-search`)!==null)
+                        {
+
+                            o.querySelector(`#response-search`).style.marginTop = o.querySelector(".response_box").scrollTop + 'px';
+                        }
+                        else
+                        {
+                            console.log('o.querySelector(`#response-search`)');
+
+                            var search_div = document.createElement("div");
+                            search_div.id = "response-search";
+                            search_div.innerHTML = `
+                            
+                                <input type="text" id="content" placeholder="內容">
+                                <input type="text" id="name" placeholder="暱稱(帳號)">
+                            `;
+
+                            o.querySelector(".response_info").prepend(search_div);
+                            
+                            search_div.querySelectorAll("input").forEach(input=>{
+
+                                input.addEventListener("keydown",Ex.f.ReplurkSearch);
+
+                            });
+                        }
+                    });
+
                 },1000);
                 
+            },
+            "ReplurkSearch":(e)=>{
+                                
+                if(
+                    e.code.toLocaleLowerCase()==="enter" || 
+                    e.code.toLocaleLowerCase()==="numpadenter")
+                {
+                    var response_box = e.path[3]; 
+                    var pid = response_box.querySelector(".list .cboxAnchor").dataset.pid;
+
+                    Ex.f.GetPlurk(pid);
+
+                    response_box.querySelectorAll(`[data-rid]`).forEach(o=>{
+                        o.style.display = "none";
+                    });
+
+                    var content = e.target.parentElement.querySelector("#content").value;
+                    var name = e.target.parentElement.querySelector("#name").value;
+                    
 
 
+                    setTimeout(()=>{
+
+                        
+                        Ex.flag.plurk[pid]._replurk.forEach(r=>{
+
+                            var _re_user = Ex.flag.plurk[pid]._re_user||[];
+
+                            var display_name = (_re_user.find(a=>a.uid===r.user_id)||{}).display_name||"";
+                            var nick_name = (_re_user.find(a=>a.uid===r.user_id)||{}).nick_name||"";
+                            var handle = r.handle||"";
+
+
+                            if(
+                                r.content_raw.indexOf(content)!==-1 &&
+                                ( 
+                                    handle.indexOf(name)!==-1 || 
+                                    display_name.indexOf(name)!==-1 || 
+                                    nick_name.indexOf(name)!==-1
+                                )
+                            ){
+                                if(document.querySelector(`[data-rid="${r.id}"]`))
+                                document.querySelector(`[data-rid="${r.id}"]`).style.display = "block";
+                            }
+                        });
+                        response_box.scrollTo(0,0);
+
+                    },500);
+                }
             },
             "PieChart":(plurk_div)=>{
 
@@ -452,6 +553,9 @@
 
                         Ex.f.MsgPop('投票噗建立完成',e);
                     break;
+
+
+                    
 
                 }
             },
