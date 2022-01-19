@@ -153,6 +153,12 @@ div#VoteOption>div span.error{
     height: 20px;
     font-size: 12px;
     width: 80px;
+}
+.img-holder{
+    overflow:hidden !important;
+}
+.cbox_img{
+    width:auto !important;
 }`
         },
         "obj":{},
@@ -319,6 +325,16 @@ div#VoteOption>div span.error{
                             });
                         }
                     });
+
+                    if(document.querySelector(".cbox_img")!==null)
+                    {
+                        if(document.querySelector(".cbox_img").clientHeight>document.querySelector(".img-holder").clientHeight)
+                        {
+                            document.querySelector(".cbox_img").style.height = 
+                            `${document.querySelector(".img-holder").clientHeight}px`
+                            
+                        }
+                    }                    
 
                 },1000);
                 
