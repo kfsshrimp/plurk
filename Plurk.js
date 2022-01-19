@@ -159,6 +159,7 @@ div#VoteOption>div span.error{
 }
 .cbox_img{
     width:auto !important;
+    max-height:${document.body.clientHeight-50}px;
 }`
         },
         "obj":{},
@@ -328,6 +329,7 @@ div#VoteOption>div span.error{
 
                     if(document.querySelector(".cbox_img")!==null)
                     {
+                        return;
                         if(document.querySelector(".cbox_img").clientHeight>document.querySelector(".img-holder").clientHeight)
                         {
                             document.querySelector(".cbox_img").style.height = 
