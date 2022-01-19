@@ -1,5 +1,5 @@
 (()=>{
-    var Ex = {
+    Ex = {
         "id":"Plurk",
         "DB":false,
         "Storage":{
@@ -233,7 +233,10 @@ div#VoteOption>div span.error{
 
                 var user_check = [];
                 replurk.forEach(v=>{
-
+                    
+                    
+                    v.content = v.content.match(/[0-9]/);
+                    v.content = (v.content===null)?v.content:v.content[0];
                     if(
                         isNaN(parseInt(v.content))===true ||
                         user_check.indexOf( v.handle||v.user_id )!==-1 || 
