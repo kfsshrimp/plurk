@@ -1,24 +1,734 @@
-var $jscomp=$jscomp||{};$jscomp.scope={};$jscomp.createTemplateTagFirstArg=function(a){return a.raw=a};$jscomp.createTemplateTagFirstArgWithRaw=function(a,b){a.raw=b;return a};$jscomp.arrayIteratorImpl=function(a){var b=0;return function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}}};$jscomp.arrayIterator=function(a){return{next:$jscomp.arrayIteratorImpl(a)}};$jscomp.makeIterator=function(a){var b="undefined"!=typeof Symbol&&Symbol.iterator&&a[Symbol.iterator];return b?b.call(a):$jscomp.arrayIterator(a)};
-(function(){var a={id:"Plurk",DB:!1,Storage:{local:!1,session:!1},Clock:{setInterval:{},setTimeout:{}},flag:{plurk:{}},config:{canvas:{height:80,width:80},vote_max:6},template:{},style:function(){return":root{\n\n}\n#"+a.id+"{\n    display:none;\n}\n#"+a.id+"-Msg{\n    display:none;\n    border:1px solid #000;\n    border-radius: 5px;\n    background: #fff5;\n    position: absolute;\n    padding:5px;\n    color: #000;\n    z-index:9999;\n}\n#"+a.id+'-Msg input[type="button"]{\n    padding: 4px 6px;\n    font-size: 12px;\n}\n#'+
-a.id+"-Menu{\n    display:none;\n    border:1px solid #000;\n    border-radius: 5px;\n    background: #fff5;\n    position: absolute;\n    padding:5px;\n    color: #000;\n}\n#"+a.id+"-Loading{\n    width: 100%;\n    height: 100%;\n    background:#222;\n    opacity: 1;\n    display: block;\n    transition-duration: 1s;\n    position: fixed;\n    cursor:wait;\n    z-index: 99;\n    color:#fff;\n}\n#"+a.id+"-Loading div{\n    position: absolute;\n    height: 50px;\n    width: 50px;\n    top: calc(50% - 50px);\n    left: calc(50% - 50px);\n    border-radius: 50%;\n    background: transparent;\n}\n#"+
-a.id+"-Loading div:nth-child(1){\n\n    border-top:3px solid #aaa;\n    animation: load 1s infinite linear;\n}\n#"+a.id+'-Loading div:nth-child(2){\n    top: calc(50% - -10px);\n    left: calc(50% - 58px);\n}\n@keyframes load {\n    to {\n        transform: rotateZ(360deg);\n    }\n}\ncanvas{\n    position: absolute;\n    left: 100%;\n    border-radius: 50%;\n    border: 1px double #fff;\n    transition-duration: 0.8s;\n}\ncanvas:hover{\n    transform: scale(1.2);\n}\ndiv#VoteInfo{\n    position: absolute;\n    width: auto;\n    height: auto;\n    left: 100%;\n    top: 90px;\n    background: #fff8;\n    color: #000;\n    padding: 2px 2px;\n    margin: 2px;\n    border-radius: 5px;\n    border: 2px double #fff;\n    opacity:0;\n    transition-duration: 0.8s;\n}\ndiv#VoteInfo:hover{\n    opacity:1 !important;\n}\ndiv#VoteInfo li{\n\n    border-radius: 5px;\n    padding: 1px 8px;\n    margin-bottom: 2px;\n}\ndiv#VoteOption {\n    display: grid;\n    min-width: 110px;\n}\ndiv#VoteOption input[type="text"]{\n    width: 100px;\n}\ndiv#VoteOption span{\n    display:none;\n    color:#f00;\n    width: 0px;\n    margin: -20px 0 0 104px;\n}\ndiv#VoteOption span.error{\n    display:block;\n}\n#response-search {\n    transition-duration: 0.3s;\n    position: absolute;\n    z-index: 9999;\n    display: inline;\n    margin-top: 0px;\n    margin-left: 260px;\n}\n#response-search input{\n    height: 20px;\n    font-size: 12px;\n    width: 80px;\n}'},
-obj:{},f:{GetPlurk:function(b){a.flag.plurk[b]=PlurksManager.getPlurkById(b);a.f.GetRePlurk(b)},GetRePlurk:function(b){ResponsesManager.loadResponses(b);var c=setInterval(function(){0!==ResponsesManager.getPlurkResponses(b).length&&(clearInterval(c),ResponsesManager.loadOlderResponses(b,!0),a.flag.plurk[b]._replurk=ResponsesManager.getPlurkResponses(b),99999!==a.flag.plurk[b].owner_id&&(a.flag.plurk[b]._re_user=ResponsesManager.getPlurkResponsesUsers(b).map(function(d){return Users.getUserById(d)})),
--1!==document.querySelector('div[data-pid="'+b+'"]').innerHTML.indexOf("\u3010\u6295\u7968\u3011")&&a.f.RePlurkToPieChart(b))},500)},RePlurkToPieChart:function(b){replurk=a.flag.plurk[b]._replurk;if(void 0===replurk[0])document.querySelector('.block_cnt:nth-child(1)>div[data-uid="'+GLOBAL.session_user.uid+'"][data-pid="'+b+'"]').querySelectorAll("canvas,#VoteInfo").forEach(function(e){e.remove()});else{b=document.querySelector('.block_cnt:nth-child(1)>div[data-uid="'+GLOBAL.session_user.uid+'"][data-pid="'+
-b+'"]');var c=a.flag.plurk[replurk[0].plurk_id];c._vote={1:0,2:0,3:0,4:0,5:0,6:0};var d=[];replurk.forEach(function(e){!0===isNaN(parseInt(e.content))||-1!==d.indexOf(e.user_id)||e.content>a.config.vote_max||(d.push(e.user_id),c._vote[e.content]=(c._vote[e.content]||0)+1)});0<Object.keys(c._vote).length&&a.f.PieChart(b)}},plurk_obj_set:function(){a.obj.vote_btn=document.createElement("div");a.obj.vote_btn.className="submit_img submit_img_color";a.obj.vote_btn.style.fontSize="20px";a.obj.vote_btn.innerHTML=
-"\u767c\u8d77\u6295\u7968";a.obj.vote_btn.dataset.event="ClickEvent";a.obj.vote_btn.dataset.mode="CreateVote";document.querySelector(".plurkForm:not(.mini-mode) .submit_img").parentElement.insertBefore(a.obj.vote_btn,document.querySelector(".plurkForm:not(.mini-mode) .submit_img"));console.log("plurk_obj_set");a.Clock.setInterval.GetVotePlurk=setInterval(function(){document.querySelectorAll('.block_cnt:nth-child(1)>div[data-uid="'+GLOBAL.session_user.uid+'"]').forEach(function(b){-1!==b.innerHTML.indexOf("\u3010\u6295\u7968\u3011")&&
-(void 0===a.flag.plurk[b.dataset.pid]&&a.f.GetPlurk(b.dataset.pid),void 0!==a.flag.plurk[b.dataset.pid]._replurk&&a.f.RePlurkToPieChart(b.dataset.pid))});document.querySelectorAll("#cbox_response,#form_holder").forEach(function(b){if(null!==b.querySelector("#response-search"))b.querySelector("#response-search").style.marginTop=b.querySelector(".response_box").scrollTop+"px";else{console.log("o.querySelector(`#response-search`)");var c=document.createElement("div");c.id="response-search";c.innerHTML=
-'\n\n                                <input type="text" id="content" placeholder="\u5167\u5bb9">\n                                <input type="text" id="name" placeholder="\u66b1\u7a31(\u5e33\u865f)">\n                            ';b.querySelector(".response_info").prepend(c);c.querySelectorAll("input").forEach(function(d){d.addEventListener("keydown",a.f.ReplurkSearch)})}})},1E3)},ReplurkSearch:function(b){if("enter"===b.code.toLocaleLowerCase()||"numpadenter"===b.code.toLocaleLowerCase()){var c=
-b.path[3],d=c.querySelector(".list .cboxAnchor").dataset.pid;a.f.GetPlurk(d);c.querySelectorAll("[data-rid]").forEach(function(g){g.style.display="none"});var e=b.target.parentElement.querySelector("#content").value,h=b.target.parentElement.querySelector("#name").value;setTimeout(function(){a.flag.plurk[d]._replurk.forEach(function(g){var f=a.flag.plurk[d]._re_user||[],k=(f.find(function(l){return l.uid===g.user_id})||{}).display_name||"";f=(f.find(function(l){return l.uid===g.user_id})||{}).nick_name||
-"";var m=g.handle||"";-1===g.content_raw.indexOf(e)||-1===m.indexOf(h)&&-1===k.indexOf(h)&&-1===f.indexOf(h)||!document.querySelector('[data-rid="'+g.id+'"]')||(document.querySelector('[data-rid="'+g.id+'"]').style.display="block")});c.scrollTo(0,0)},500)}},PieChart:function(b){null===b.querySelector("canvas")&&(b.innerHTML='\n                        <canvas style="opacity:0;"\n                        data-m_event="MouseEvent"\n                        data-mode="VoteInfo"\n                        height="'+
-a.config.canvas.height+'" width="'+a.config.canvas.width+'">\n                        </canvas>\n                        <div id="VoteInfo"></div>\n                        '+b.innerHTML+"\n                    ",b.querySelector("canvas").addEventListener("mouseleave",function(q){q.target.parentElement.querySelector("div#VoteInfo").style.opacity="0"}));var c=b.querySelector("canvas"),d=c.getContext("2d"),e=Math.floor(c.width/2),h=Math.floor(c.height/2),g=2*Math.PI,f=0,k=a.flag.plurk[c.parentElement.dataset.pid]._vote,
-m=Object.values(k).reduce(function(q,t){return q+t}),l="#8f8681 #32435F #E4B660 #FE7773 #028C6A #1D6A96".split(" "),r="",n=0,p;for(p in k)r+='<li style="background:'+l[n]+'8">'+(n+1)+"\uff1a"+k[p]+"\u7968("+Math.floor(k[p]/m*100||0)+"%)</li>",c=f+k[p],d.beginPath(),d.moveTo(e,h),d.arc(e,h,e,f/m*g,c/m*g),f=d.createRadialGradient(e,h,0,e,h,e),f.addColorStop(0,"#888"),f.addColorStop(1,l[n]),d.fillStyle=f,d.strokeStyle="#fff",d.fill(),n++,f=c;r+="<li>\u7e3d\u7968\u6578\uff1a"+m+"</li>";b.querySelector("#VoteInfo").innerHTML=
-"<ul>"+r+"</ul>";setTimeout(function(){null!==b.querySelector("canvas")&&(b.querySelector("canvas").style.opacity="1")},1E3)},ClickEvent:function(b){switch(b.target.dataset.mode){case "CreateVote":b=new MouseEvent("click",{clientX:Math.floor(window.innerWidth/2),clientY:Math.floor(window.innerHeight/4)});a.f.MsgPop('\n                        <div id="VoteOption">\n                        <input type="text" placeholder="\u9078\u98051"><span>*</span>\n                        <input type="text" placeholder="\u9078\u98052"><span>*</span>\n                        </div>\n                        <input\n                        data-event="ClickEvent"\n                        data-mode="SubmitVote"\n                        type="button" value="\u9001\u51fa">\n                        <input\n                        data-event="ClickEvent"\n                        data-mode="AddOption"\n                        type="button" value="\u589e\u52a0\u9078\u9805">',
-b);break;case "AddOption":var c=document.createElement("input");c.type="text";c.setAttribute("placeholder","\u9078\u9805"+(b.target.parentElement.querySelectorAll('input[type="text"]').length+1));var d=document.createElement("span");d.innerHTML="*";b.target.parentElement.querySelector("div").appendChild(c);b.target.parentElement.querySelector("div").appendChild(d);b.target.parentElement.querySelectorAll('input[type="text"]').length>=a.config.vote_max&&b.target.setAttribute("disabled","disabled");
-break;case "SubmitVote":var e="\u3010\u6295\u7968\u3011\n"+document.querySelector("#input_big").value+"\n",h=!1;b.target.parentElement.querySelectorAll('input[type="text"]').forEach(function(g,f){""===g.value?(g.focus(),b.target.parentElement.querySelectorAll("span")[f].classList.add("error"),h=!0):b.target.parentElement.querySelectorAll("span")[f].classList.remove("error");e+="\u3010"+(f+1)+"\u3011"+g.value+"\n"});h||(PlurkAdder.addPlurk({qualifier:":",content:e}),a.f.MsgPop("\u6295\u7968\u5657\u5efa\u7acb\u5b8c\u6210",
-b))}},MouseEvent:function(b){switch(b.target.dataset.mode){case "VoteInfo":b.target.parentElement.querySelector("div#VoteInfo").style.opacity="1"}},DB_set:function(b,c){if("undefined"!==typeof firebase)a.DB=firebase,a.DB=a.DB.database(),c();else{var d=document.createElement("script");d.src="https://www.gstatic.com/firebasejs/5.5.6/firebase.js";document.head.appendChild(d);var e=setInterval(function(){"undefined"!==typeof firebase&&(clearInterval(e),a.DB=firebase,a.DB.initializeApp({databaseURL:b}),
-a.DB=a.DB.database(),c())},100)}},style_set:function(){a.obj.styleSheet=document.createElement("style");a.obj.styleSheet.title=a.id;a.obj.styleSheet.innerText=a.style();document.head.appendChild(a.obj.styleSheet)},obj_set:function(){a.obj.Ex_div=document.createElement("div");a.obj.Ex_div.setAttribute("draggable","true");a.obj.Ex_div.id=a.id;a.obj.Ex_div.innerHTML="";a.obj.msg=document.createElement("div");a.obj.msg.id=a.id+"-Msg";a.obj.msg.setAttribute("draggable","true");a.obj.msg.innerHTML='\n                <div></div>\n                <input type="button" data-event="close" data-obj="'+
-a.id+'-Msg" value="\u95dc\u9589">\n                ';a.obj.menu=document.createElement("div");a.obj.menu.id=a.id+"-Menu";a.obj.menu.setAttribute("draggable","true");a.obj.menu.innerHTML="\n                <ul>\n                </ul>\n                ";a.obj.load=document.createElement("div");a.obj.load.id=a.id+"-Loading";a.obj.load.innerHTML="\n                <div></div>\n                <div>LOADING...</div>\n                ";document.body.appendChild(a.obj.Ex_div);document.body.appendChild(a.obj.msg);
-document.body.appendChild(a.obj.menu)},FlagUpd:function(){document.querySelectorAll("[data-flag]").forEach(function(b){b.innerHTML=a.flag[b.dataset.flag]})},StorageUpd:function(){localStorage[a.id]=JSON.stringify(a.Storage.local);sessionStorage[a.id]=JSON.stringify(a.Storage.session)},MsgPop:function(b,c){c=void 0===c?document.createEvent("mouseEvents"):c;a.obj.msg.style.left=c.clientX+"px";a.obj.msg.style.top=c.clientY+"px";a.obj.msg.style.display="block";a.obj.msg.querySelector("div").innerHTML=
-b},close:function(b){document.querySelector("#"+b.target.dataset.obj).style.display="none"},rad:function(b){return Math.floor(Math.random()*b)+1},shuffle:function(b){for(var c=b.length-1;0<c;c--){var d=Math.floor(Math.random()*(c+1)),e=$jscomp.makeIterator([b[d],b[c]]);b[c]=e.next().value;b[d]=e.next().value}},"default":function(){1<document.querySelectorAll(".plurkForm:not(.mini-mode) .submit_img").length||(document.addEventListener("dragend",function(b){"true"===b.target.getAttribute("draggable")&&
-(b.target.style.left=b.clientX-a.flag.mousedown.offsetX+"px",b.target.style.top=b.clientY-a.flag.mousedown.offsetY+"px","true"===b.target.dataset.draggable_remove&&-1*b.target.style.top.split("px")[0]>=Math.floor(b.target.clientHeight/2)&&b.target.remove())}),document.addEventListener("mouseover",function(b){if(void 0!==b.target.dataset.m_event)a.f[b.target.dataset.m_event](b)}),document.addEventListener("mousedown",function(b){a.flag.mousedown=b}),document.addEventListener("click",function(b){if(void 0!==
-b.target.dataset.event)a.f[b.target.dataset.event](b)}),document.addEventListener("contextmenu",function(b){void 0!==b.target.dataset.r_event&&(b.stopPropagation(),b.preventDefault(),a.f[b.target.dataset.r_event](b))}),a.Storage={local:JSON.parse(localStorage[a.id]||"{}"),session:JSON.parse(sessionStorage[a.id]||"{}")},a.f.style_set(),a.f.obj_set(),a.f.plurk_obj_set())}}};a.f["default"]()})();
+(()=>{
+    var Ex = {
+        "id":"Plurk",
+        "DB":false,
+        "Storage":{
+            "local":false,
+            "session":false
+        },
+        "Clock":{
+            "setInterval":{},
+            "setTimeout":{}
+        },
+        "flag":{
+            "plurk":{}
+           
+        },
+        "config":{
+            "canvas":{
+                "height":80,
+                "width":80
+            },
+            "vote_max":6
+        },
+        "template":{},
+        "style":()=>{
+return `
+:root{
+    
+}
+#${Ex.id}{
+    display:none;
+}
+#${Ex.id}-Msg{
+    display:none;
+    border:1px solid #000;
+    border-radius: 5px;
+    background: #fff5;
+    position: absolute;
+    padding:5px;
+    color: #000;
+    z-index:9999;
+}
+#${Ex.id}-Msg input[type="button"]{
+    padding: 4px 6px;
+    font-size: 12px;
+}
+#${Ex.id}-Menu{
+    display:none;
+    border:1px solid #000;
+    border-radius: 5px;
+    background: #fff5;
+    position: absolute;
+    padding:5px;
+    color: #000;
+}
+#${Ex.id}-Loading{
+    width: 100%;
+    height: 100%;
+    background:#222;
+    opacity: 1;
+    display: block;
+    transition-duration: 1s;
+    position: fixed;
+    cursor:wait;
+    z-index: 99;
+    color:#fff;
+}
+#${Ex.id}-Loading div{
+    position: absolute;
+    height: 50px;
+    width: 50px;
+    top: calc(50% - 50px);
+    left: calc(50% - 50px);
+    border-radius: 50%;
+    background: transparent;
+}
+#${Ex.id}-Loading div:nth-child(1){
+    
+    border-top:3px solid #aaa;
+    animation: load 1s infinite linear;
+}
+#${Ex.id}-Loading div:nth-child(2){
+    top: calc(50% - -10px);
+    left: calc(50% - 58px);
+}
+@keyframes load {
+    to {
+        transform: rotateZ(360deg);
+    }
+}
+canvas{
+    position: absolute;
+    left: 100%;
+    border-radius: 50%;
+    border: 1px double #fff;
+    transition-duration: 0.8s;
+}
+canvas:hover{
+    transform: scale(1.2);
+}
+div#VoteInfo{
+    position: absolute;
+    width: auto;
+    height: auto;
+    left: 100%;
+    top: 90px;
+    background: #fff8;
+    color: #000;
+    padding: 2px 2px;
+    margin: 2px;
+    border-radius: 5px;
+    border: 2px double #fff;
+    opacity:0;
+    transition-duration: 0.8s;
+}
+div#VoteInfo:hover{
+    opacity:1 !important;
+}
+div#VoteInfo li{
+    
+    border-radius: 5px;
+    padding: 1px 8px;
+    margin-bottom: 2px;
+}
+div#VoteOption {
+    display: grid;
+    min-width: 110px;
+}
+div#VoteOption input[type="text"]{
+    width: 100px;
+}
+div#VoteOption span{
+    display:none;
+    color:#f00;
+    width: 0px;
+    margin: -20px 0 0 104px;
+}
+div#VoteOption span.error{
+    display:block;
+}
+#response-search {
+    transition-duration: 0.1s;
+    position: absolute;
+    z-index: 9999;
+    display: inline;
+    margin-top: 0px;
+    margin-left: 260px;
+}
+#response-search input{
+    height: 20px;
+    font-size: 12px;
+    width: 80px;
+}`
+        },
+        "obj":{},
+        "f":{
+            "GetPlurk":(pid)=>{
+
+                Ex.flag.plurk[ pid ] = PlurksManager.getPlurkById(pid);
+
+                Ex.f.GetRePlurk( pid );
+
+            },
+            "GetRePlurk":(pid)=>{
+
+                ResponsesManager.loadResponses( pid );
+
+                var _t = setInterval(()=>{
+
+                    if(ResponsesManager.getPlurkResponses( pid ).length!==0)
+                    {
+                        clearInterval(_t);
+
+                        ResponsesManager.loadOlderResponses( pid,!0);
+                        Ex.flag.plurk[ pid ]._replurk =  ResponsesManager.getPlurkResponses( pid );
+
+                        if(Ex.flag.plurk[ pid ].owner_id!==99999)
+                        {
+                            Ex.flag.plurk[ pid ]._re_user = ResponsesManager.getPlurkResponsesUsers(pid).map( d=>{
+                                return Users.getUserById(d)
+                            });
+                        }
+                        
+                        if(document.querySelector(`div[data-pid="${pid}"]`).innerHTML.indexOf("【投票】")!==-1)
+                        {
+                            Ex.f.RePlurkToPieChart( pid );
+                        }
+                        
+                    }
+
+                },500);
+
+                /*"ResponsesManager":ResponsesManager
+                ResponsesManager.loadResponses( parseInt('ophxn9',36) )
+                ResponsesManager.loadOlderResponses( parseInt('ophxn9',36) , !0)
+                ResponsesManager.getPlurkResponses( parseInt('ophxn9',36) )
+
+
+                PlurkAdder.addPlurk({qualifier: ":",content:"test1" })
+                PlurkAdder.addResponse( {plurk_id:parseInt("opmub0",36),owner_id:14556765},"test2",":")
+                PlurkAdder.editPlurk({plurk_id:parseInt("opmub0",36),id:parseInt("opmub0",36)},"aaa")
+
+                */
+            },
+            "RePlurkToPieChart":(pid)=>{
+
+                replurk = Ex.flag.plurk[ pid ]._replurk
+
+                //console.log(replurk);
+                if(replurk[0]===undefined)
+                {
+                    document.querySelector(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"][data-pid="${pid}"]`).querySelectorAll("canvas,#VoteInfo").forEach(o=>{o.remove();})
+
+                    return;
+                }
+
+                //[data-uid="${GLOBAL.session_user.uid}"]
+                var plurk_div = document.querySelector(`.block_cnt:nth-child(1)>div[data-pid="${pid}"]`);
+
+                var plurk = Ex.flag.plurk[ replurk[0].plurk_id ];
+
+                plurk._vote = {
+                    "1":0,
+                    "2":0,
+                    "3":0,
+                    "4":0,
+                    "5":0,
+                    "6":0
+                };
+
+                var user_check = [];
+                replurk.forEach(v=>{
+
+                    if(
+                        isNaN(parseInt(v.content))===true ||
+                        user_check.indexOf( v.handle||v.user_id )!==-1 || 
+                        v.content>Ex.config.vote_max
+                    ) return;
+
+                    user_check.push( v.handle||v.user_id );
+
+
+                    plurk._vote[ v.content ] = 
+                    (plurk._vote[ v.content ]||0)+1;
+                });
+
+                if(Object.keys(plurk._vote).length>0)
+                {
+                    Ex.f.PieChart(plurk_div);
+                }
+
+            },
+            "plurk_obj_set":()=>{
+
+                
+                Ex.obj.vote_btn = document.createElement("div");
+                Ex.obj.vote_btn.className = "submit_img submit_img_color";
+                Ex.obj.vote_btn.style.fontSize = "20px";
+                Ex.obj.vote_btn.innerHTML = "發起投票";
+
+                Ex.obj.vote_btn.dataset.event = "ClickEvent";
+                Ex.obj.vote_btn.dataset.mode = "CreateVote";
+
+                document.querySelector(".plurkForm:not(.mini-mode) .submit_img").parentElement.insertBefore( Ex.obj.vote_btn ,document.querySelector(".plurkForm:not(.mini-mode) .submit_img"));
+
+                console.log('plurk_obj_set');
+
+                Ex.Clock.setInterval.GetVotePlurk = setInterval(()=>{
+
+                    /*
+                    :not(${Object.keys(Ex.flag.plurk).map(a=>{return `[data-pid="${a}"]`;}).join(",")||'a'})`
+                    */
+
+                    document.querySelectorAll(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"]`).forEach(o=>{
+
+                        if(o.innerHTML.indexOf("【投票】")===-1) return;
+    
+                        if(Ex.flag.plurk[ o.dataset.pid ]===undefined) 
+                            Ex.f.GetPlurk( o.dataset.pid );
+
+                       
+                        if( Ex.flag.plurk[ o.dataset.pid ]._replurk!==undefined )
+                            Ex.f.RePlurkToPieChart( o.dataset.pid );
+
+                    });
+
+                    
+                    document.querySelectorAll(`#cbox_response,#form_holder`).forEach(o=>{
+
+                        if(o.querySelector(`#response-search`)!==null)
+                        {
+
+                            o.querySelector(`#response-search`).style.marginTop = o.querySelector(".response_box").scrollTop + 'px';
+                        }
+                        else
+                        {
+                            console.log('o.querySelector(`#response-search`)');
+
+                            var search_div = document.createElement("div");
+                            search_div.id = "response-search";
+                            search_div.innerHTML = `
+                            
+                                <input type="text" id="content" placeholder="內容">
+                                <input type="text" id="name" placeholder="暱稱(帳號)">
+                            `;
+
+                            o.querySelector(".response_info").prepend(search_div);
+                            
+                            search_div.querySelectorAll("input").forEach(input=>{
+
+                                input.addEventListener("keydown",Ex.f.ReplurkSearch);
+
+                            });
+                        }
+                    });
+
+                },1000);
+                
+            },
+            "ReplurkSearch":(e)=>{
+                                
+                if(
+                    e.code.toLocaleLowerCase()==="enter" || 
+                    e.code.toLocaleLowerCase()==="numpadenter")
+                {
+                    var response_box = e.path[3]; 
+                    var pid = response_box.querySelector(".list .cboxAnchor").dataset.pid;
+
+                    Ex.f.GetPlurk(pid);
+
+                    response_box.querySelectorAll(`[data-rid]`).forEach(o=>{
+                        o.style.display = "none";
+                    });
+
+                    var content = e.target.parentElement.querySelector("#content").value;
+                    var name = e.target.parentElement.querySelector("#name").value;
+                    
+
+
+                    setTimeout(()=>{
+
+                        
+                        Ex.flag.plurk[pid]._replurk.forEach(r=>{
+
+                            var _re_user = Ex.flag.plurk[pid]._re_user||[];
+
+                            var display_name = (_re_user.find(a=>a.uid===r.user_id)||{}).display_name||"";
+                            var nick_name = (_re_user.find(a=>a.uid===r.user_id)||{}).nick_name||"";
+                            var handle = r.handle||"";
+
+
+                            if(
+                                r.content_raw.indexOf(content)!==-1 &&
+                                ( 
+                                    handle.indexOf(name)!==-1 || 
+                                    display_name.indexOf(name)!==-1 || 
+                                    nick_name.indexOf(name)!==-1
+                                )
+                            ){
+                                if(document.querySelector(`[data-rid="${r.id}"]`))
+                                document.querySelector(`[data-rid="${r.id}"]`).style.display = "block";
+                            }
+                        });
+                        response_box.scrollTo(0,0);
+
+                    },500);
+                }
+            },
+            "PieChart":(plurk_div)=>{
+
+
+                if(plurk_div.querySelector("canvas")===null)
+                {
+                    plurk_div.innerHTML = `
+                        <canvas style="opacity:0;" 
+                        data-m_event="MouseEvent" 
+                        data-mode="VoteInfo" 
+                        height="${Ex.config.canvas.height}" width="${Ex.config.canvas.width}">
+                        </canvas>
+                        <div id="VoteInfo"></div>
+                        ${plurk_div.innerHTML}
+                    `;
+
+                    plurk_div.querySelector("canvas").addEventListener("mouseleave",(e)=>{
+                        e.target.parentElement.querySelector("div#VoteInfo").style.opacity = "0";
+                    });
+
+                }
+
+                var canvas = plurk_div.querySelector("canvas")
+                var c2d = canvas.getContext("2d");
+                var x = Math.floor(canvas.width/2);
+                var y = Math.floor(canvas.height/2);
+                var r = x;
+                var p = 2*Math.PI;
+                var deg_start = 0;
+                var deg_end; 
+                var vote = Ex.flag.plurk[ canvas.parentElement.dataset.pid ]._vote;
+
+                var total = Object.values(vote).reduce( (a,b)=>{return a+b;});
+
+
+                var color = [
+                    "#8f8681",
+                    "#32435F",
+                    "#E4B660",
+                    "#FE7773",
+                    "#028C6A",
+                    "#1D6A96"
+                ];
+
+                
+                /*
+                var color = [
+                    "#f00",
+                    "#0f0",
+                    "#00f",
+                    "#ff0",
+                    "#f0f",
+                    "#0ff",
+                    "#000"
+                ]
+                */
+               
+                var word = ``;
+                var count = 0;
+                for(var i in vote)
+                {
+                    word+=`<li style="background:${color[count]}8">${count+1}：${vote[i]}票(${Math.floor((vote[i]/total*100)||0)}%)</li>`;
+
+                    deg_end = deg_start + vote[i];
+
+                    c2d.beginPath();
+                    c2d.moveTo(x,y);
+                    c2d.arc(x,y,r,deg_start/total*p,deg_end/total*p);
+
+                    var grd = c2d.createRadialGradient(x,y,0,x,y,r);
+                    grd.addColorStop(0,"#888");
+                    grd.addColorStop(1,color[count]);
+
+
+                    c2d.fillStyle = grd;
+                    c2d.strokeStyle = "#fff";
+                    c2d.fill();
+                    //c2d.stroke();
+
+                    count++;
+
+                    deg_start = deg_end;
+                }
+                
+                word +=`<li>總票數：${total}</li>`;
+
+                plurk_div.querySelector("#VoteInfo").innerHTML = `<ul>${word}</ul>`;
+
+                setTimeout(()=>{
+                    if(plurk_div.querySelector("canvas")!==null)
+                    plurk_div.querySelector("canvas").style.opacity = "1";
+                },1000);
+                
+
+            },
+            "ClickEvent":(e)=>{
+
+                switch (e.target.dataset.mode)
+                {
+                    case "CreateVote":
+
+                        e =  new MouseEvent("click",{
+                            clientX: Math.floor(window.innerWidth/2),
+                            clientY: Math.floor(window.innerHeight/4)
+                        });
+                        
+
+                        Ex.f.MsgPop(`
+                        <div id="VoteOption">
+                        <input type="text" placeholder="選項1"><span>*</span>
+                        <input type="text" placeholder="選項2"><span>*</span>
+                        </div>
+                        <input 
+                        data-event="ClickEvent" 
+                        data-mode="SubmitVote"
+                        type="button" value="送出">
+                        <input 
+                        data-event="ClickEvent" 
+                        data-mode="AddOption"
+                        type="button" value="增加選項">`,e);
+
+                    break;
+
+                    case "AddOption":
+
+                        var option = document.createElement("input");
+                        option.type = "text";
+                        option.setAttribute("placeholder",`選項${e.target.parentElement.querySelectorAll(`input[type="text"]`).length+1}`);
+                        var span = document.createElement("span");
+                        span.innerHTML = "*";
+
+
+                        e.target.parentElement.querySelector("div").appendChild(option);
+                        e.target.parentElement.querySelector("div").appendChild(span);
+
+                        if(e.target.parentElement.querySelectorAll(`input[type="text"]`).length>=Ex.config.vote_max) e.target.setAttribute("disabled","disabled");
+
+                    break;
+
+                    case "SubmitVote":
+
+                        var content = `【投票】\n${document.querySelector("#input_big").value}\n`;
+                        var check = false;
+
+                        e.target.parentElement.querySelectorAll(`input[type="text"]`).forEach( (o,i)=>{
+                            if(o.value===``)
+                            {
+                                o.focus();
+                                e.target.parentElement.querySelectorAll(`span`)[i].classList.add("error");
+                                check = true;
+                            }
+                            else
+                            {
+                                e.target.parentElement.querySelectorAll(`span`)[i].classList.remove("error");
+                            }
+
+                            content += `【${i+1}】${o.value}\n`;
+                        });
+
+                        if(check)
+                        {
+                            return;
+                        }
+
+                        
+                        PlurkAdder.addPlurk({
+                            qualifier: ":",
+                            content:content
+                        });
+                        
+
+                        Ex.f.MsgPop('投票噗建立完成',e);
+                    break;
+
+
+                    
+
+                }
+            },
+            "MouseEvent":(e)=>{
+
+                switch (e.target.dataset.mode)
+                {
+                    case "VoteInfo":
+                        e.target.parentElement.querySelector("div#VoteInfo").style.opacity = "1";
+                    break;
+
+                }
+            },
+            "DB_set":function( URL,func ){
+
+                if( typeof(firebase)!=='undefined' )
+                {
+                    Ex.DB = firebase;
+                    Ex.DB = Ex.DB.database();
+
+                    func();
+                    return;
+                }
+
+                var firebasejs1 = document.createElement("script");
+                firebasejs1.src="https://www.gstatic.com/firebasejs/5.5.6/firebase.js";
+                document.head.appendChild(firebasejs1);
+
+                var _t = setInterval(() => {
+                    if( typeof(firebase)!=='undefined' )
+                    {
+                        clearInterval(_t);
+                        Ex.DB = firebase;
+                        Ex.DB.initializeApp({databaseURL:URL});
+                        Ex.DB = Ex.DB.database();
+
+                        func();
+                    }
+                },100);
+                
+            },
+            "style_set":function(){
+                
+                Ex.obj.styleSheet = document.createElement("style");
+                Ex.obj.styleSheet.title = Ex.id;
+                Ex.obj.styleSheet.innerText = Ex.style();
+                
+                document.head.appendChild( Ex.obj.styleSheet );
+            },
+            "obj_set":function(){
+
+                Ex.obj.Ex_div = document.createElement("div");
+                Ex.obj.Ex_div.setAttribute("draggable","true");
+                Ex.obj.Ex_div.id = Ex.id;
+
+                Ex.obj.Ex_div.innerHTML = ``;
+
+
+                Ex.obj.msg = document.createElement("div");
+                Ex.obj.msg.id = `${Ex.id}-Msg`;
+                Ex.obj.msg.setAttribute("draggable","true");
+                Ex.obj.msg.innerHTML = `
+                <div></div>
+                <input type="button" data-event="close" data-obj="${Ex.id}-Msg" value="關閉">
+                `;
+
+                Ex.obj.menu = document.createElement("div");
+                Ex.obj.menu.id = `${Ex.id}-Menu`;
+                Ex.obj.menu.setAttribute("draggable","true");
+                Ex.obj.menu.innerHTML = `
+                <ul>
+                </ul>
+                `;
+
+                Ex.obj.load = document.createElement("div");
+                Ex.obj.load.id = `${Ex.id}-Loading`;
+                Ex.obj.load.innerHTML = `
+                <div></div>
+                <div>LOADING...</div>
+                `;
+                
+                //document.body.prepend( Ex.obj.load );
+
+                document.body.appendChild( Ex.obj.Ex_div );
+                document.body.appendChild( Ex.obj.msg );
+                document.body.appendChild( Ex.obj.menu );
+            },
+            "FlagUpd":()=>{
+                document.querySelectorAll(`[data-flag]`).forEach(o=>{
+                    o.innerHTML = Ex.flag[o.dataset.flag];
+                });
+            },
+            "StorageUpd":()=>{
+                localStorage[Ex.id] = JSON.stringify(Ex.Storage.local);
+                sessionStorage[Ex.id] = JSON.stringify(Ex.Storage.session);
+            },
+            "MsgPop":(str,e = document.createEvent("mouseEvents"))=>{
+
+                Ex.obj.msg.style.left = e.clientX + 'px';
+                Ex.obj.msg.style.top = e.clientY + 'px';
+                Ex.obj.msg.style.display = "block";
+                Ex.obj.msg.querySelector("div").innerHTML = str;
+
+            },
+            "close":(e)=>{
+                document.querySelector(`#${e.target.dataset.obj}`).style.display = "none";
+            },
+            "rad":(n)=>{
+                return Math.floor(Math.random() * n)+1;
+            },
+            "shuffle":(ary)=>{
+                for (let i = ary.length - 1; i > 0; i--) {
+                    let j = Math.floor(Math.random() * (i + 1));
+                    [ary[i], ary[j]] = [ary[j], ary[i]];
+                }
+            },
+            "default":()=>{
+
+
+                /*
+                Ex.Clock.setInterval.flag = setInterval(()=>{
+                    Ex.f.FlagUpd();
+                },1000);
+                */
+
+                if(document.querySelectorAll(".plurkForm:not(.mini-mode) .submit_img").length>1)
+                {
+                    return;
+                }
+
+
+                document.addEventListener("dragend",function(e){
+
+
+                    if(e.target.getAttribute("draggable")==="true")
+                    {
+                        e.target.style.left = e.clientX - Ex.flag.mousedown.offsetX + "px";
+                        e.target.style.top = e.clientY - Ex.flag.mousedown.offsetY + "px";
+
+                        if(e.target.dataset.draggable_remove==="true" && e.target.style.top.split("px")[0]*-1>=Math.floor(e.target.clientHeight/2))
+                        {
+                            e.target.remove();
+                        }
+
+                    }
+                });
+
+                document.addEventListener("mouseover",function(e){
+                    if(e.target.dataset.m_event!==undefined) Ex.f[ e.target.dataset.m_event ](e);
+                });
+
+
+                document.addEventListener("mousedown",function(e){
+                    Ex.flag.mousedown = e;
+                });
+
+                document.addEventListener("click",(e)=>{
+
+                    if(e.target.dataset.event!==undefined) Ex.f[ e.target.dataset.event ](e);
+                });
+            
+                document.addEventListener("contextmenu",(e)=>{
+
+                    if(e.target.dataset.r_event!==undefined)
+                    {
+                        e.stopPropagation();
+                        e.preventDefault();
+
+                        Ex.f[ e.target.dataset.r_event ](e);
+                    }
+                });
+
+                Ex.Storage = {
+                    "local":JSON.parse(localStorage[Ex.id]||`{}`),
+                    "session":JSON.parse(sessionStorage[Ex.id]||`{}`)
+                }
+                
+                Ex.f.style_set();
+                Ex.f.obj_set();
+                Ex.f.plurk_obj_set();
+                
+            }
+        }
+    };
+
+    Ex.f.default();
+
+})();
+
+
+//var js = document.createElement("script");js.src =  `https://kfsshrimp.github.io/plurk/YtScreenShot.js?s=${new Date().getTime()}`;document.head.prepend(js);
