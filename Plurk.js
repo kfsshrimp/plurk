@@ -124,18 +124,21 @@ div#VoteInfo li{
 }
 div#VoteOption {
     display: grid;
+}
+div#VoteOption>div{
+    display: grid;
     min-width: 110px;
 }
-div#VoteOption input[type="text"]{
+div#VoteOption>div input[type="text"]{
     width: 100px;
 }
-div#VoteOption span{
+div#VoteOption>div span{
     display:none;
     color:#f00;
     width: 0px;
     margin: -20px 0 0 104px;
 }
-div#VoteOption span.error{
+div#VoteOption>div span.error{
     display:block;
 }
 #response-search {
@@ -256,7 +259,7 @@ div#VoteOption span.error{
                 Ex.obj.vote_btn = document.createElement("div");
                 Ex.obj.vote_btn.className = "submit_img submit_img_color";
                 Ex.obj.vote_btn.style.fontSize = "20px";
-                Ex.obj.vote_btn.innerHTML = "發起投票";
+                Ex.obj.vote_btn.innerHTML = "建立投票";
 
                 Ex.obj.vote_btn.dataset.event = "ClickEvent";
                 Ex.obj.vote_btn.dataset.mode = "CreateVote";
@@ -271,7 +274,7 @@ div#VoteOption span.error{
                     :not(${Object.keys(Ex.flag.plurk).map(a=>{return `[data-pid="${a}"]`;}).join(",")||'a'})`
                     */
 
-                    document.querySelectorAll(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"]`).forEach(o=>{
+                    document.querySelectorAll(`.block_cnt:nth-child(1)>div[data-uid="${GLOBAL.session_user.uid}"],.block_cnt:nth-child(1)>div[data-uid="99999"]`).forEach(o=>{
 
                         if(o.innerHTML.indexOf("【投票】")===-1) return;
     
@@ -474,17 +477,19 @@ div#VoteOption span.error{
 
                         Ex.f.MsgPop(`
                         <div id="VoteOption">
+                        <div>
                         <input type="text" placeholder="選項1"><span>*</span>
                         <input type="text" placeholder="選項2"><span>*</span>
                         </div>
                         <input 
                         data-event="ClickEvent" 
                         data-mode="SubmitVote"
-                        type="button" value="送出">
+                        type="button" value="完成">
                         <input 
                         data-event="ClickEvent" 
                         data-mode="AddOption"
-                        type="button" value="增加選項">`,e);
+                        type="button" value="增加選項">
+                        </div>`,e);
 
                     break;
 
@@ -506,8 +511,9 @@ div#VoteOption span.error{
 
                     case "SubmitVote":
 
-                        var content = `【投票】\n${document.querySelector("#input_big").value}\n`;
+                        var content = `【投票】\n`;
                         var check = false;
+                        var opt = [];
 
                         e.target.parentElement.querySelectorAll(`input[type="text"]`).forEach( (o,i)=>{
                             if(o.value===``)
@@ -521,15 +527,22 @@ div#VoteOption span.error{
                                 e.target.parentElement.querySelectorAll(`span`)[i].classList.remove("error");
                             }
 
-                            content += `【${i+1}】${o.value}\n`;
+                            opt.push(`【${i+1}】${o.value}`);
                         });
+
+                        content += opt.join("\n");
+                        
 
                         if(check)
                         {
                             return;
                         }
 
-                        
+                        document.querySelector("#input_big").value = content;
+
+                        document.querySelector("#input_big").style.height = document.querySelector("#input_big").scrollHeight + 'px'
+
+                        /*
                         PlurkAdder.addPlurk({
                             qualifier: ":",
                             content:content
@@ -537,6 +550,7 @@ div#VoteOption span.error{
                         
 
                         Ex.f.MsgPop('投票噗建立完成',e);
+                        */
                     break;
 
 
