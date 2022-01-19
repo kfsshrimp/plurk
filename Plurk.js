@@ -1,5 +1,5 @@
 (()=>{
-    Ex = {
+    var Ex = {
         "id":"Plurk",
         "DB":false,
         "Storage":{
@@ -269,7 +269,7 @@ div#VoteOption>div span.error{
 
                 document.querySelector(".plurkForm:not(.mini-mode) .submit_img").parentElement.insertBefore( Ex.obj.vote_btn ,document.querySelector(".plurkForm:not(.mini-mode) .submit_img"));
 
-                console.log('plurk_obj_set');
+
 
                 Ex.Clock.setInterval.GetVotePlurk = setInterval(()=>{
 
@@ -300,7 +300,7 @@ div#VoteOption>div span.error{
                         }
                         else
                         {
-                            console.log('o.querySelector(`#response-search`)');
+
 
                             var search_div = document.createElement("div");
                             search_div.id = "response-search";
