@@ -51,9 +51,9 @@ var ALL = {
                     "尾丸ポルカ":["座長","尾丸","ポルカ"]
                 },
                 "6期生":{
-                    "ラプラス・ダークネス":["總帥","山田","ラプラス","LAP","LA+"],
+                    "ラプラス・ダークネス":["總帥","山田","ラプラス","拉普"],
                     "鷹嶺ルイ":["rui","lui","鷹","鷹嶺","ルイ"],
-                    "博衣こより":["博衣","こより","博士"],
+                    "博衣こより":["博衣","こより","博士","koyo"],
                     "沙花叉クロヱ":["虎鯨","沙花叉","クロヱ"],
                     "風真いろは":["風真"]
                 },
@@ -306,6 +306,7 @@ window.onload = function(){
         document.body.appendChild(ALL.obj.main);
     }
 
+    /*
     ALL.obj.top_bar = document.querySelector("#top_bar");
     if(ALL.obj.top_bar===null)
     {
@@ -315,6 +316,7 @@ window.onload = function(){
         ALL.obj.top_bar.innerHTML = `▲`;
         document.body.appendChild(ALL.obj.top_bar);
     }
+    */
 
     window.addEventListener("click",(e)=>{
 
@@ -573,7 +575,7 @@ window.onload = function(){
         if(e.target.getAttribute("draggable")==="true")
         {
             e.target.style.left = e.clientX - ALL.mousedown.offsetX;
-            e.target.style.top = e.clientY - ALL.mousedown.offsetY + window.scrollY;
+            e.target.style.top = e.clientY - ALL.mousedown.offsetY;
         }
     });
 
@@ -671,10 +673,10 @@ function MenuCr(path,obj)
             關鍵字搜尋<br>
             <select>
             <option value="">搜尋類型</option>
-            <option value="youtu">youtube</option>
-            <option value="nhentai">nhentai</option>
-            <option value="asmr">ASMR</option>
-            <option value="mmd">MMD</option>
+            <option value="Vtuber烤肉集中">youtube</option>
+            <option value="nhentai薄本">nhentai</option>
+            <option value="ASMR集中">ASMR</option>
+            <option value="MMD集中">MMD</option>
             </select>
             <input type="text"><BR>
             <input type="button" value="搜尋" data-detail_search="true">
@@ -729,6 +731,13 @@ function Search(keyword,sort)
     }
     
 
+    var type_word = {
+        "1476616791":"nhentai薄本",
+        "1490940777":"Vtuber烤肉集中",
+        "1491244060":"ASMR集中",
+        "1491901992":"MMD集中",
+    }
+
     for(var id in ALL.plurk)
     {
         for(var r_id in ALL.plurk[id].responses)
@@ -740,6 +749,9 @@ function Search(keyword,sort)
             var f_data = ALL.plurk[id].responses[r_id];
 
             if(f_data.user_id!==ALL.plurk[id].plurk.owner_id) continue;
+
+            f_data.type = type_word[ f_data.plurk_id ].toLocaleLowerCase();
+            
 
             var content = f_data.content.toLocaleLowerCase();
             content_text = DelHtmlTag(content);
@@ -762,18 +774,15 @@ function Search(keyword,sort)
 
             f_data.tag = (f_data.content_raw.split("\n").length>1)?tag:"";
 
-            
 
             if(
                 (
                     tag.indexOf(str)!==-1 || 
                     content_text.indexOf(str)!==-1
                 ) && 
-                    content.indexOf(type)!==-1 
-                    &&
                     tag_not.indexOf(str)===-1
                     &&
-                    tag_not.indexOf(type)===-1
+                    (f_data.type===type || type==="")
             )
             {
                 search_result[ f_data.id ] = f_data;
@@ -837,12 +846,19 @@ function Search(keyword,sort)
 
         var a = list.querySelectorAll("a");
 
+
         var content_type = "";
+        if(list.dataset.plurk_id==="1476616791") content_type = "nh";
+        if(list.dataset.plurk_id!=="1476616791") content_type = "yt";
+
+
+        /*var content_type = "";
         for(var i=0;i<a.length;i++)
         {
             if( a[i].href.indexOf("youtu")!==-1 ) content_type = "yt";
             if( a[i].href.indexOf("nhentai")!==-1 ) content_type = "nh";
         }
+        */
         list.className = content_type;
 
 
