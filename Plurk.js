@@ -274,8 +274,10 @@ div#VoteOption>div span.error{
                 Ex.obj.vote_btn.dataset.event = "ClickEvent";
                 Ex.obj.vote_btn.dataset.mode = "CreateVote";
 
-                document.querySelector(".plurkForm:not(.mini-mode) .submit_img").parentElement.insertBefore( Ex.obj.vote_btn ,document.querySelector(".plurkForm:not(.mini-mode) .submit_img"));
-
+                if( document.querySelector("#input_big")!==null)
+                {
+                    document.querySelector(".plurkForm:not(.mini-mode) .submit_img").parentElement.insertBefore( Ex.obj.vote_btn ,document.querySelector(".plurkForm:not(.mini-mode) .submit_img"));
+                }
 
 
                 Ex.Clock.setInterval.GetVotePlurk = setInterval(()=>{
@@ -298,12 +300,22 @@ div#VoteOption>div span.error{
                     });
 
                     
-                    document.querySelectorAll(`#cbox_response,#form_holder`).forEach(o=>{
+                    document.querySelectorAll(`#cbox_response,#form_holder,#plurk_responses`).forEach(o=>{
 
                         if(o.querySelector(`#response-search`)!==null)
                         {
+                            if(o.id==="plurk_responses")
+                            {
+                                var mtop = window.scrollY - document.querySelector(".bigplurk").clientHeight;
+                                mtop = (mtop<0)?0:mtop;
 
-                            o.querySelector(`#response-search`).style.marginTop = o.querySelector(".response_box").scrollTop + 'px';
+                                o.querySelector(`#response-search`).style.marginTop = mtop + 'px';
+                                o.querySelector(`#response-search`).style.right = '0px'
+                            }
+                            else
+                            {
+                                o.querySelector(`#response-search`).style.marginTop = o.querySelector(".response_box").scrollTop + 'px';
+                            }
                         }
                         else
                         {
