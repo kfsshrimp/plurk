@@ -1,5 +1,18 @@
+var Ex;
 (()=>{
-    var Ex = {
+    Ex = {
+        "OtherExSet":(ExName)=>{
+            var js = document.createElement("script");
+            js.src =  `https://kfsshrimp.github.io/plurk/${ExName}?s=${new Date().getTime()}`;
+            document.head.prepend(js);
+
+            Ex.OtherEx[ ExName ] = eval(`new ${ExName}()`);
+
+
+        },
+        "OtherEx":{
+
+        },
         "id":"Plurk",
         "DB":false,
         "Storage":{
@@ -338,17 +351,7 @@ div#VoteOption>div span.error{
                             });
                         }
                     });
-
-                    if(document.querySelector(".cbox_img")!==null)
-                    {
-                        return;
-                        if(document.querySelector(".cbox_img").clientHeight>document.querySelector(".img-holder").clientHeight)
-                        {
-                            document.querySelector(".cbox_img").style.height = 
-                            `${document.querySelector(".img-holder").clientHeight}px`
-                            
-                        }
-                    }                    
+                
 
                 },1000);
                 
