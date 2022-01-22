@@ -3,7 +3,7 @@ var Ex;
     Ex = {
         "OtherExSet":(ExName)=>{
             var js = document.createElement("script");
-            js.src =  `https://kfsshrimp.github.io/plurk/${ExName}?s=${new Date().getTime()}`;
+            js.src =  `https://kfsshrimp.github.io/plurk/${ExName}.js?s=${new Date().getTime()}`;
             document.head.prepend(js);
 
             Ex.OtherEx[ ExName ] = eval(`new ${ExName}()`);
