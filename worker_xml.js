@@ -80,13 +80,15 @@ onmessage = function(msg){
                         plurk_id_list.map(a=>{return PlurkId(a);});
 
 
+                        /*
                         postMessage( {
                             "mode":"plurk_id_count",
                             "r":plurk_id_list
                         } );
+                        */
                         
 
-                        ApiGetList(plurk_id_list);
+                        //ApiGetList(plurk_id_list);
 
 
                         postMessage( {
@@ -145,6 +147,73 @@ onmessage = function(msg){
     */
 
 
+    if(mode==="get_replurk")
+    {
+        ApiGetRePlurk(msg.data.plurk_id)
+    }
+}
+
+function ApiGetRePlurk(plurk_id)
+{
+    var plurk = {};
+    System.api.arg.plurk_id = plurk_id;
+    System.api.act = "Timeline/getPlurk";
+    System.api.func = function(xml){
+
+        plurk = JSON.parse((xml.response));
+        setTimeout( ()=>{ 
+
+            if(System.plurk[ plurk.plurk.plurk_id ]!==undefined)
+            {
+                postMessage( {
+                    "mode":"plurk",
+                    "r":System.plurk
+                } );
+                return; 
+            }
+
+            System.plurk[ plurk.plurk.plurk_id ] = plurk;
+            System.plurk[ plurk.plurk.plurk_id ].api = new PlurkApi({
+                act:"Responses/get",
+                arg:{
+                    "plurk_id":plurk.plurk.plurk_id
+                },
+                func:function(xml){
+
+                    var replurk = JSON.parse((xml.response));
+                    
+                    for(var r_id in replurk.responses)
+                    {
+                        let f_data = replurk.responses[r_id];
+                        if(f_data.user_id!==plurk.plurk.user_id) continue;
+
+                        
+
+                        System.plurk[ plurk.plurk.plurk_id ].responses = 
+                        System.plurk[ plurk.plurk.plurk_id ].responses||{};
+                        
+                        System.plurk[ f_data.plurk_id ].responses[ f_data.id ] = f_data;
+                    }
+
+                }
+            });
+
+            System.plurk[ plurk.plurk.plurk_id ].api.Send();
+
+            for(var k in System.plurk)
+            {
+                delete System.plurk[k].api;
+            }
+
+            postMessage( {
+                "mode":"plurk",
+                "r":System.plurk
+            } );
+        
+
+        },1000);
+    }
+    System.api.Send();
 }
 
 
@@ -227,7 +296,7 @@ function ApiGetList(plurk_id)
             }
 
 
-        },500);
+        },1000);
     }
     System.api.Send();
 }

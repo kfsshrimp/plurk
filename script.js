@@ -98,7 +98,14 @@ var ALL = {
     "config":{
         "plurk_id":PlurkId("onburz"),
         "api":null,
-        "plurk":{}
+        "plurk":{},
+        "plurk_type":{
+            "1476616791":"nhentai",
+            "1490940777":"vtuber",
+            "1491244060":"asmr",
+            "1491901992":"mmd",
+            "1498712988":"twitter"
+        }
     },
     "localStorage":{},
     "sessionStorage":{},
@@ -154,6 +161,8 @@ ALL.worker.onmessage = (msg)=>{
     var mode = msg.data.mode;
     console.log(`mode:${mode}`)
 
+    console.log(msg);
+
     if(mode==="config")
     {
         LoadingBlock();
@@ -200,7 +209,6 @@ ALL.worker.onmessage = (msg)=>{
     {
         ALL.plurk = msg.data.r;
 
-
         for(var k in ALL.config.plurk[ ALL.config.plurk_id ].responses)
         {
             let f_data = ALL.config.plurk[ ALL.config.plurk_id ].responses[k];
@@ -228,6 +236,7 @@ ALL.worker.onmessage = (msg)=>{
                 ALL.config.api.Send();
             }
         }
+        Search();
     }
 
 
@@ -324,24 +333,23 @@ window.onload = function(){
 
         if(e.target.dataset.search)
         {
+            ALL.obj.menu.querySelector("#detail_search input[type=text]").value = '';
             ALL.obj.menu.querySelector("#detail_search input[type=text]").dataset._value = e.target.dataset.search;
-            document.querySelector("#detail_search select").value = "youtu";
-            var sort_obj = document.querySelector("[data-sort]");
-            Search( e.target.dataset.search ,  sort_obj.dataset.sort );
+            document.querySelector("#detail_search select").value = "vtuber";
+            Search0();
         }
 
         if(e.target.dataset.detail_search)
         {
-            var sort_obj = document.querySelector("[data-sort]");
-            var keyword = ALL.obj.menu.querySelector("#detail_search input[type=text]");
-            Search( `${keyword.value} ${keyword.dataset._value}`  , sort_obj.dataset.sort );
+            ALL.obj.menu.querySelector("#detail_search input[type=text]").dataset._value = '';
+            Search0();
         }
 
         if(e.target.dataset.tag_search)
         {
+            ALL.obj.menu.querySelector("#detail_search input[type=text]").dataset._value = '';
             ALL.obj.menu.querySelector("#detail_search input[type=text]").value = e.target.dataset.tag_search;
-            var sort_obj = document.querySelector("[data-sort]");
-            Search( e.target.dataset.tag_search , sort_obj.dataset.sort );
+            Search0();
         }
 
         if(e.target.dataset.sort)
@@ -358,9 +366,7 @@ window.onload = function(){
                 sort_obj.dataset.sort = sort_obj.dataset.sort.replace("desc","");
                 sort_obj.value = sort_obj.value.replace("↓","↑");
             }
-
-
-            Search( ALL.obj.menu.querySelector("#detail_search input[type=text]").value , e.target.dataset.sort );
+            Search0();
         }
 
         if(e.target.dataset.setting_act)
@@ -587,16 +593,20 @@ window.onload = function(){
 
     window.addEventListener("scroll",(e)=>{
 
-        var list = document.querySelectorAll("#main>div>div:not([class=''])[hide]");
+        //var list = document.querySelectorAll("#main>div>div:not([class=''])[hide]");
 
 
         if(window.innerHeight+window.scrollY>=document.body.scrollHeight)
         {
+            /*
             var show_count = Math.floor(document.querySelector("#main").offsetWidth / (document.querySelector("#main>div>div:not([hide])").offsetWidth));
             for(var i=0;i<show_count;i++)
             {
                 if(list[i]) list[i].removeAttribute("hide");
             }
+            */
+
+            CreateHtml();
         }
 
 
@@ -672,11 +682,11 @@ function MenuCr(path,obj)
         <div id="detail_search">
             關鍵字搜尋<br>
             <select>
-            <option value="">搜尋類型</option>
-            <option value="Vtuber烤肉集中">youtube</option>
-            <option value="nhentai薄本">nhentai</option>
-            <option value="ASMR集中">ASMR</option>
-            <option value="MMD集中">MMD</option>
+            <option value="vtuber">vtuber</option>
+            <option value="nhentai">nhentai</option>
+            <option value="asmr">asmr</option>
+            <option value="mmd">MMD</option>
+            <option value="twitter">twitter</option>
             </select>
             <input type="text"><BR>
             <input type="button" value="搜尋" data-detail_search="true">
@@ -704,13 +714,39 @@ function MenuCr(path,obj)
         `;
     }
 
+}
 
+function Search0()
+{
+    
+    var type = document.querySelector("#detail_search select").value.toLocaleLowerCase();
+    var type_word = ALL.config.plurk_type;
+    var id;
+    for(var _id in type_word) if(type_word[_id]===type) id = _id;
+    
+
+    ALL.worker.postMessage( {
+        "mode":"get_replurk",
+        "plurk_id":id
+    } );
+    
 }
 
 
 
 function Search(keyword,sort)
 {
+    var sort_obj = document.querySelector("[data-sort]");
+    var keyword_obj = ALL.obj.menu.querySelector("#detail_search input[type=text]");
+
+    keyword = `${keyword_obj.value} ${keyword_obj.dataset._value}`;
+    sort = sort||sort_obj.dataset.sort;
+    
+
+    keyword = keyword.trim();
+
+    console.log(keyword.split(" "));
+
     var search_result = {};
 
     var type = document.querySelector("#detail_search select").value.toLocaleLowerCase();
@@ -729,22 +765,22 @@ function Search(keyword,sort)
         ALL.sessionStorage.h_confirm = 0;
         sessionStorage.kfs_plurk = JSON.stringify(ALL.sessionStorage);
     }
+
+    
     
 
-    var type_word = {
-        "1476616791":"nhentai薄本",
-        "1490940777":"Vtuber烤肉集中",
-        "1491244060":"ASMR集中",
-        "1491901992":"MMD集中",
-    }
+    var type_word = ALL.config.plurk_type;
+    
+    var id;
+    for(var _id in type_word) if(type_word[_id]===type) id = _id;
 
-    for(var id in ALL.plurk)
-    {
+    //for(var id in ALL.plurk)
+    //{
         for(var r_id in ALL.plurk[id].responses)
         for(var key in keyword.split(" "))
         {
             var str = keyword.split(" ")[key].toLocaleLowerCase();
-            //if(str==="") continue;
+            if(str==="" && keyword.split(" ").length!==1) continue;
 
             var f_data = ALL.plurk[id].responses[r_id];
 
@@ -775,6 +811,8 @@ function Search(keyword,sort)
             f_data.tag = (f_data.content_raw.split("\n").length>1)?tag:"";
 
 
+
+
             if(
                 (
                     tag.indexOf(str)!==-1 || 
@@ -788,7 +826,8 @@ function Search(keyword,sort)
                 search_result[ f_data.id ] = f_data;
             }
         }
-    }
+
+    //}
 
     ALL.obj.main.innerHTML = "";
     
@@ -799,9 +838,18 @@ function Search(keyword,sort)
 
     search_result = JsonToList(search_result,sort);
 
+    console.log(search_result);
+
+    ALL.search_result = search_result;
     
 
-    
+    var div = document.createElement("div");
+    ALL.obj.main.appendChild(div);
+    document.body.scrollTo(0,0);
+
+    CreateHtml();
+
+    return;
 
 
 
@@ -850,6 +898,7 @@ function Search(keyword,sort)
         var content_type = "";
         if(list.dataset.plurk_id==="1476616791") content_type = "nh";
         if(list.dataset.plurk_id!=="1476616791") content_type = "yt";
+        if(list.dataset.plurk_id==="1498712988") content_type = "twitter";
 
 
         /*var content_type = "";
@@ -865,7 +914,7 @@ function Search(keyword,sort)
         
         if(content_type==="yt")
         {
-            if(document.querySelector("#detail_search select").value==="nh")
+            if(document.querySelector("#detail_search select").value==="nhentai")
                 list.setAttribute("hide","");
 
             var title = list.querySelector("a").text;
@@ -895,7 +944,7 @@ function Search(keyword,sort)
         }
         else if(content_type==="nh")
         {
-            if(document.querySelector("#detail_search select").value==="yt")
+            if(document.querySelector("#detail_search select").value!=="nhentai")
                 list.setAttribute("hide","");
 
             var url = list.querySelectorAll("a:not([class*=pictureservices])");
@@ -925,6 +974,42 @@ function Search(keyword,sort)
             <date>${date}</date>
             `;
         }
+        else if(content_type==="twitter")
+        {
+            if(document.querySelector("#detail_search select").value!=="twitter")
+                list.setAttribute("hide","");
+
+            var url = list.querySelectorAll("a:not([class*=pictureservices])");
+            var img = list.querySelectorAll("a[class*=ex_link]");
+            var date = list.querySelector("date").innerHTML;
+            var plurk_id = parseInt(list.dataset.plurk_id).toString(36);
+            var tag = list.querySelector("tag").innerHTML.split(" ").map(t=>{
+                return `<a data-tag_search=${t}>${t}</a>`
+            }).join(" ");
+
+            /*
+            for(var i=0;i<img.length;i++)
+            {
+                var tmp = img[i].querySelector("img").src;
+                tmp = tmp.split("/");
+                tmp["3"] = tmp["3"].split("_");
+                tmp["3"].shift();
+                tmp["3"] = tmp["3"].toString().replace("jpg","png")
+                img[i].querySelector("img").src = tmp.join("/");
+            }
+            */
+            console.log(img[0]);
+
+            list.innerHTML = `
+            <!--<a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>-->
+            <yt_title>${img[0].innerText}</yt_title>
+            <tag>${tag}</tag>
+            <a target="_blank" href="${url[0].href}">
+            <img src="${img[0].querySelector("img").src}">
+            </a>
+            <date>${date}</date>
+            `;
+        }
         else
         {
             list.setAttribute("hide","");
@@ -943,6 +1028,157 @@ function Search(keyword,sort)
     document.body.scrollTo(0,0);
 
     //ALL.obj.main.appendChild(table);
+}
+
+
+function CreateHtml()
+{
+    var search_result = ALL.search_result;
+
+    var div = ALL.obj.main.querySelector("div");
+
+    var now_count = ALL.obj.main.querySelector("div").childElementCount;
+
+    for(var id in search_result)
+    {
+        if(id<now_count) continue;
+        if(id>=now_count+10) break;
+
+        var f_data = search_result[ id ];
+
+        var list = document.createElement("div");
+        list.id = f_data.id;
+        list.dataset.plurk_id = f_data.plurk_id;
+
+        list.innerHTML = 
+        `${f_data.content}<BR><date>${DateF(( f_data.posted ))}</date><tag>${f_data.tag}</tag>`;
+
+        div.appendChild(list);
+    }
+
+
+    for(var idx=0;idx<div.querySelectorAll("div[id]").length;idx++)
+    {
+        if(idx<now_count) continue;
+        if(idx>=now_count+10) break;
+
+        var list = div.querySelectorAll("div[id]")[idx];
+
+        var a = list.querySelectorAll("a");
+
+
+        var content_type = "";
+        if(list.dataset.plurk_id==="1476616791") content_type = "nh";
+        if(list.dataset.plurk_id!=="1476616791") content_type = "yt";
+        if(list.dataset.plurk_id==="1498712988") content_type = "twitter";
+
+
+        /*var content_type = "";
+        for(var i=0;i<a.length;i++)
+        {
+            if( a[i].href.indexOf("youtu")!==-1 ) content_type = "yt";
+            if( a[i].href.indexOf("nhentai")!==-1 ) content_type = "nh";
+        }
+        */
+        list.className = content_type;
+
+
+        
+        if(content_type==="yt")
+        {
+            var title = list.querySelector("a").text;
+            var img = list.querySelector("img").src;
+            var date = list.querySelector("date").innerHTML;
+            var plurk_id = parseInt(list.dataset.plurk_id).toString(36);
+            var tag = list.querySelector("tag").innerHTML.split(" ").map(t=>{
+                return `<a data-tag_search=${t}>${t}</a>`
+            }).join(" ");
+            img = img.split("/");
+            var yt_id = img["4"];
+            img.pop();
+            img.push("hqdefault.jpg");
+            img = img.join("/");
+
+            list.innerHTML = `
+            <!--<a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>-->
+            <tag>${tag}</tag>
+            <a target="_blank" href="${a[0].href}">
+            <yt_title>${title}</yt_title>
+            </a>
+            <img data-iframe="https://www.youtube.com/embed/${yt_id}" src="${img}">
+            <div draggable="true" hide iframe>
+            <input type="button" value="關閉" close>
+            <iframe src=""></iframe></div>
+            <date>${date}</date>`;
+        }
+        else if(content_type==="nh")
+        {
+            var url = list.querySelectorAll("a:not([class*=pictureservices])");
+            var img = list.querySelectorAll("a[class*=pictureservices]");
+            var date = list.querySelector("date").innerHTML;
+            var plurk_id = parseInt(list.dataset.plurk_id).toString(36);
+            var tag = list.querySelector("tag").innerHTML.split(" ").map(t=>{
+                return `<a data-tag_search=${t}>${t}</a>`
+            }).join(" ");
+
+            for(var i=0;i<img.length;i++)
+            {
+                var tmp = img[i].querySelector("img").src;
+                tmp = tmp.split("/");
+                tmp["3"] = tmp["3"].split("_");
+                tmp["3"].shift();
+                tmp["3"] = tmp["3"].toString().replace("jpg","png")
+                img[i].querySelector("img").src = tmp.join("/");
+            }
+
+            list.innerHTML = `
+            <!--<a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>-->
+            <tag>${tag}</tag>
+            <a target="_blank" href="${url[0].href}">
+            <img src="${img[0].querySelector("img").src}">
+            </a>
+            <date>${date}</date>
+            `;
+        }
+        else if(content_type==="twitter")
+        {
+            var url = list.querySelectorAll("a:not([class*=pictureservices])");
+            var img = list.querySelectorAll("a[class*=ex_link]");
+            var date = list.querySelector("date").innerHTML;
+            var plurk_id = parseInt(list.dataset.plurk_id).toString(36);
+            var tag = list.querySelector("tag").innerHTML.split(" ").map(t=>{
+                return `<a data-tag_search=${t}>${t}</a>`
+            }).join(" ");
+
+            /*
+            for(var i=0;i<img.length;i++)
+            {
+                var tmp = img[i].querySelector("img").src;
+                tmp = tmp.split("/");
+                tmp["3"] = tmp["3"].split("_");
+                tmp["3"].shift();
+                tmp["3"] = tmp["3"].toString().replace("jpg","png")
+                img[i].querySelector("img").src = tmp.join("/");
+            }
+            */
+
+            list.innerHTML = `
+            <!--<a target="_blank" href="https://www.plurk.com/p/${plurk_id}">PLURK</a>-->
+            <twitter_title>${img[0].innerText}</twitter_title>
+            <tag>${tag}</tag>
+            <a target="_blank" href="${url[0].href}">
+            <img src="${img[0].querySelector("img").src}">
+            </a>
+            <date>${date}</date>
+            `;
+        }
+
+
+
+    }
+    
+    //document.body.scrollTo(0,0);
+
 }
 
 
