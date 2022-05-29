@@ -1,7 +1,7 @@
-importScripts("core-min.js");
-importScripts("sha1-min.js");
-importScripts("hmac-min.js");
-importScripts("enc-base64-min.js");
+importScripts("https://kfsshrimp.github.io/sha1/core-min.js");
+importScripts("https://kfsshrimp.github.io/sha1/sha1-min.js");
+importScripts("https://kfsshrimp.github.io/sha1/hmac-min.js");
+importScripts("https://kfsshrimp.github.io/sha1/enc-base64-min.js");
 importScripts("api.js");
 
 
