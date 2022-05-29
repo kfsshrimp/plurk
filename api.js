@@ -35,7 +35,7 @@ function PlurkApi( opt = {})
         "nick_name&"
     ];
 
-    this.Send = ()=>{
+    this.Send = (CORS = true)=>{
 
         for(var key of api_row)
         {
@@ -163,7 +163,7 @@ function PlurkApi( opt = {})
         }
         */
 
-        XmlSend( this.SBS, this.act , this.func );
+        XmlSend( this.SBS, this.act , this.func , CORS);
 
         for(var key in this.arg )
         {
@@ -184,7 +184,7 @@ function PlurkApi( opt = {})
 
 
 //GET
-function XmlSend(SBS,act,func)
+function XmlSend(SBS,act,func,CORS)
 {
 
     var STR = "GET&";
@@ -195,14 +195,14 @@ function XmlSend(SBS,act,func)
 
 
     //Data url 順序隨意
-    //var url = System.CORS + ("https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS);
+    var url = (CORS===true)?System.CORS + ("app="+act+"&oauth_signature="+oauth_signature +"&"+ SBS):"https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS;
+    
 
     //for api.allorigins.win
     //var url = System.CORS + encodeURIComponent("https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS);
 
 
-    //for firebase cloud function
-    var url = System.CORS + ("app="+act+"&oauth_signature="+oauth_signature +"&"+ SBS);
+    
 
     //console.log(url);
 
@@ -259,3 +259,81 @@ function DateF(date)
 
     return _w;
 }
+
+
+/*
+
+var api;
+
+var js_a = [
+    'https://kfsshrimp.github.io/sha1/core-min.js',
+    'https://kfsshrimp.github.io/sha1/sha1-min.js',
+    'https://kfsshrimp.github.io/sha1/hmac-min.js',
+    'https://kfsshrimp.github.io/sha1/enc-base64-min.js',
+    'https://kfsshrimp.github.io/plurk/api.js' 
+]
+
+
+for(var i in js_a){
+
+    let j_src = js_a[i];
+    setTimeout(()=>{ var js = document.createElement("script");js.src = j_src;document.head.prepend(js); },(i+1)*100);
+
+}
+
+setTimeout(()=>{ 
+    
+    api = new PlurkApi();
+    api.act = "Timeline/getPlurk";
+    api.func = (r)=>{ 
+        var r = JSON.parse(r.response);
+        api.data = api.data||{};
+        api.data[ r.plurk.plurk_id ] = r;
+    }
+
+},js_a.length*1000);
+
+function GetPlurk(plurk_id)
+{
+    api.arg.plurk_id = PlurkId(plurk_id);
+    api.Send();
+}
+
+function XmlSend(SBS,act,func)
+{
+
+    var STR = "GET&";
+    STR += encodeURIComponent("https://www.plurk.com/APP/"+act)+"&";
+    STR += encodeURIComponent(SBS);
+
+    var oauth_signature = encodeURIComponent( CryptoJS.HmacSHA1(STR,_x()[1] + "&" + _x()[3]).toString( CryptoJS.enc.Base64 ) );
+
+
+    //Data url 順序隨意
+    var url = "https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS;
+
+    //for api.allorigins.win
+    //var url = System.CORS + encodeURIComponent("https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS);
+
+
+    //for firebase cloud function
+    //var url = System.CORS + ("app="+act+"&oauth_signature="+oauth_signature +"&"+ SBS);
+
+    //console.log(url);
+
+    var xml;
+    xml = new XMLHttpRequest();
+    xml.open("GET",url, System.XmlAsync );
+    xml.setRequestHeader('Content-type','application/x-www-form-urlencoded;');
+
+    if( typeof(func)==="function" )
+        xml.onreadystatechange = ()=>{ func(xml); }
+
+    xml.send();
+}
+
+
+
+
+
+*/
