@@ -19,6 +19,7 @@ function PlurkApi( opt = {})
 {
     this.func = opt.func||function(){};
     this.arg = opt.arg||{};
+    this.mode = "CORS";
 
     for(var key in opt) this[key] = opt[key]||"";
     
@@ -35,7 +36,7 @@ function PlurkApi( opt = {})
         "nick_name&"
     ];
 
-    this.Send = (CORS = true)=>{
+    this.Send = ()=>{
 
         for(var key of api_row)
         {
@@ -163,7 +164,7 @@ function PlurkApi( opt = {})
         }
         */
 
-        XmlSend( this.SBS, this.act , this.func , CORS);
+        XmlSend( this.SBS, this.act , this.func , this.mode);
 
         for(var key in this.arg )
         {
@@ -184,7 +185,7 @@ function PlurkApi( opt = {})
 
 
 //GET
-function XmlSend(SBS,act,func,CORS)
+function XmlSend(SBS,act,func,mode)
 {
 
     var STR = "GET&";
@@ -195,7 +196,7 @@ function XmlSend(SBS,act,func,CORS)
 
 
     //Data url 順序隨意
-    var url = (CORS===true)?System.CORS + ("app="+act+"&oauth_signature="+oauth_signature +"&"+ SBS):"https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS;
+    var url = (mode==="CORS")?System.CORS + ("app="+act+"&oauth_signature="+oauth_signature +"&"+ SBS):"https://www.plurk.com/APP/"+act+"?oauth_signature="+oauth_signature +"&"+ SBS;
     
 
     //for api.allorigins.win
@@ -285,6 +286,7 @@ setTimeout(()=>{
     
     api = new PlurkApi();
     api.act = "Timeline/getPlurk";
+    api.mode = "no"
     api.func = (r)=>{ 
         var r = JSON.parse(r.response);
         api.data = api.data||{};
