@@ -35,7 +35,9 @@ function PlurkApi( opt = {} )
         "&response_id",
         "filter&",
         "nick_name&",
-        "&offset"
+        "&offset",
+        "minimal_data&",
+        "minimal_user&"
     ];
 
     this.Send = ()=>{
@@ -80,6 +82,8 @@ function PlurkApi( opt = {} )
 
                 this.SBS = 
                 this.arg.limit + 
+                this.arg.minimal_data +
+                this.arg.minimal_user +
                 this.arg.nick_name + 
                 "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0" + 
                 this.arg.offset;
@@ -276,6 +280,9 @@ function DateF(date)
     return _w;
 }
 
+
+
+
 /*
 
 api = new PlurkApi();
@@ -291,12 +298,43 @@ api.func = (r)=>{
 api.arg.plurk_id = parseInt('oxa347',36);
 api.Send();
 
+
+
+var PlurkData = [];
+var api = new PlurkApi();
+api.act = "Timeline/getPublicPlurks";
+api.arg.minimal_data = "true";
+api.arg.minimal_user = "true";
+api.arg.nick_name = "kfsshrimp4";
+api.arg.limit = "100";
+api.mode = "no";
+
+api.func = (r)=>{ 
+
+    if(PlurkData.length!==0)
+        api.arg.offset = new Date(PlurkData[PlurkData.length-1].posted).toISOString().split(".")[0];
+
+    var r = JSON.parse(r.response);
+    console.log(r);
+    PlurkData = PlurkData.concat(r.plurks);
+
+    if(PlurkData.length<=300)
+    {
+        setTimeout(()=>{api.Send();},500);
+    }
+}
+api.Send();
+
+
+
+
 api = new PlurkApi();
 api.act = "Timeline/getPublicPlurks";
 api.mode = "no";
 api.arg.nick_name = "kfsshrimp4";
 api.arg.limit = "30";
-api.arg.offset = "2022-7-15T21:55:34";
+api.arg.offset = "2022-7-15T21:55:34"; 
+//new Date('Fri, 15 Jul 2022 05:31:26 GMT').toISOString()
 
 
 api.func = (r)=>{ 
