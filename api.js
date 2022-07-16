@@ -14,7 +14,7 @@ function _x(){
 }
 
 
-System.worker = new Worker("worker_xml.js");
+System.worker = new Worker("https://kfsshrimp.github.io/plurk/worker_xml.js");
 
 
 function PlurkApi( opt = {} )
@@ -22,6 +22,7 @@ function PlurkApi( opt = {} )
     this.func = opt.func||function(){};
     this.arg = opt.arg||{};
     this.mode = "CORS";
+    this.debug = false;
 
     for(var key in opt) this[key] = opt[key]||"";
     
@@ -89,9 +90,6 @@ function PlurkApi( opt = {} )
                 this.arg.nick_name + 
                 "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0" + 
                 this.arg.offset;
-
-
-                console.log(this.SBS);
 
             break;
 
@@ -184,6 +182,8 @@ function PlurkApi( opt = {} )
             }
         }
         */
+
+        if(this.debug) console.log(this.SBS);
 
         XmlSend( this.SBS, this.act , this.func , this.mode);
 
