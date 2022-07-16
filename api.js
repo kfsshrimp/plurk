@@ -15,7 +15,7 @@ function _x(){
 
 
 
-function PlurkApi( opt = {})
+function PlurkApi( opt = {} )
 {
     this.func = opt.func||function(){};
     this.arg = opt.arg||{};
@@ -27,13 +27,15 @@ function PlurkApi( opt = {})
     var api_row = [
         "content&",
         "limited_to&",
+        "limit&",
         "no_comments&",
         "&plurk_id",
         "count&",
         "from_response&",
         "&response_id",
         "filter&",
-        "nick_name&"
+        "nick_name&",
+        "&offset"
     ];
 
     this.Send = ()=>{
@@ -72,6 +74,19 @@ function PlurkApi( opt = {})
 
                 this.SBS = 
                 "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0"+this.arg.plurk_id;
+            break;
+
+            case "Timeline/getPublicPlurks":
+
+                this.SBS = 
+                this.arg.limit + 
+                this.arg.nick_name + 
+                "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0" + 
+                this.arg.offset;
+
+
+                console.log(this.SBS);
+
             break;
 
             case "Responses/get":
@@ -260,6 +275,39 @@ function DateF(date)
 
     return _w;
 }
+
+/*
+
+api = new PlurkApi();
+api.act = "Timeline/getPlurk";
+api.mode = "no";
+
+api.func = (r)=>{ 
+    var r = JSON.parse(r.response);
+    api.data = api.data||{};
+    api.data[ r.plurk.plurk_id ] = r;
+    console.log(r);
+}
+api.arg.plurk_id = parseInt('oxa347',36);
+api.Send();
+
+api = new PlurkApi();
+api.act = "Timeline/getPublicPlurks";
+api.mode = "no";
+api.arg.nick_name = "kfsshrimp4";
+api.arg.limit = "30";
+api.arg.offset = "2022-7-15T21:55:34";
+
+
+api.func = (r)=>{ 
+    var r = JSON.parse(r.response);
+    
+    console.log(r);
+}
+api.Send();
+
+*/
+
 
 
 /*
