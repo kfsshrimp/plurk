@@ -14,6 +14,8 @@ function _x(){
 }
 
 
+System.worker = new Worker("worker_xml.js");
+
 
 function PlurkApi( opt = {} )
 {
@@ -300,30 +302,6 @@ api.Send();
 
 
 
-var PlurkData = [];
-var api = new PlurkApi();
-api.act = "Timeline/getPublicPlurks";
-api.arg.minimal_data = "true";
-api.arg.minimal_user = "true";
-api.arg.nick_name = "kfsshrimp4";
-api.arg.limit = "100";
-api.mode = "no";
-
-api.func = (r)=>{ 
-
-    if(PlurkData.length!==0)
-        api.arg.offset = new Date(PlurkData[PlurkData.length-1].posted).toISOString().split(".")[0];
-
-    var r = JSON.parse(r.response);
-    console.log(r);
-    PlurkData = PlurkData.concat(r.plurks);
-
-    if(PlurkData.length<=300)
-    {
-        setTimeout(()=>{api.Send();},500);
-    }
-}
-api.Send();
 
 
 
