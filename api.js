@@ -14,8 +14,6 @@ function _x(){
 }
 
 
-System.worker = new Worker("https://kfsshrimp.github.io/plurk/worker_xml.js");
-
 
 function PlurkApi( opt = {} )
 {
