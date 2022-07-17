@@ -38,7 +38,8 @@ function PlurkApi( opt = {} )
         "nick_name&",
         "&offset",
         "minimal_data&",
-        "minimal_user&"
+        "minimal_user&",
+        "&only_user"
     ];
 
     this.Send = ()=>{
@@ -87,7 +88,8 @@ function PlurkApi( opt = {} )
                 this.arg.minimal_user +
                 this.arg.nick_name + 
                 "oauth_consumer_key="+_x()[0]+"&oauth_nonce="+_nonce()+"&oauth_signature_method=HMAC-SHA1&oauth_timestamp="+_time()+"&oauth_token="+_x()[2]+"&oauth_version=1.0" + 
-                this.arg.offset;
+                this.arg.offset + 
+                this.arg.only_user;
 
             break;
 
