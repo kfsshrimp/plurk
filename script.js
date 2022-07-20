@@ -163,6 +163,7 @@ ALL.worker.onmessage = (msg)=>{
 
     console.log(msg);
 
+    
     if(mode==="config")
     {
         LoadingBlock();
@@ -193,6 +194,7 @@ ALL.worker.onmessage = (msg)=>{
 
         }
 
+        /*
         document.querySelector("#menu").innerHTML += `<div>瀏覽次數：<a>${ALL.config.plurk[ ALL.config.plurk_id ].plurk.value.web_count++}</a></div>`;
 
 
@@ -202,7 +204,7 @@ ALL.worker.onmessage = (msg)=>{
         `;
 
         ALL.config.api.Send();
-
+        */
     }
 
     if(mode==="plurk")
@@ -219,6 +221,7 @@ ALL.worker.onmessage = (msg)=>{
                 ALL.config.api.arg.response_id = f_data.id;
                 ALL.config.api.func = function(){
         
+                    /*
                     setTimeout( ()=>{
                         ALL.config.api.act = "Responses/responseAdd";
                         ALL.config.api.arg.content = `
@@ -232,6 +235,7 @@ ALL.worker.onmessage = (msg)=>{
                         ALL.config.api.Send();
 
                     },100);
+                    */
                 };
                 ALL.config.api.Send();
             }
